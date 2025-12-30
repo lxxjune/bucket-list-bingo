@@ -40,7 +40,7 @@ export const BingoBoard = React.forwardRef<HTMLDivElement, BingoBoardProps>(
                         <textarea
                             value={text}
                             onChange={(e) => handleChange(index, e.target.value)}
-                            className="w-full h-full p-2 text-center text-sm sm:text-base resize-none bg-white/80 rounded-lg border border-indigo-100 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 outline-none transition-all flex items-center justify-center placeholder:text-gray-300"
+                            className="w-full h-full p-2 text-center text-sm sm:text-base resize-none bg-white/80 rounded-lg border border-indigo-100 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 outline-none transition-all flex items-center justify-center placeholder:text-gray-300 overflow-hidden"
                             placeholder=""
                             maxLength={20}
                         />

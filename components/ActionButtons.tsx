@@ -25,6 +25,9 @@ export const ActionButtons = ({ targetRef }: ActionButtonsProps) => {
                 cacheBust: true,
                 backgroundColor: '#fff5f5', // Match the pastel background
                 pixelRatio: 3, // Higher quality
+                style: {
+                    overflow: 'hidden', // Ensure no scrollbars in capture
+                },
             });
 
             const link = document.createElement('a');

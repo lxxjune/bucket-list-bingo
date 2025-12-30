@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { Download, Share2, Check } from 'lucide-react';
-import { toPng } from 'html-to-image';
+import { toBlob } from 'html-to-image';
+import { saveAs } from 'file-saver';
 import { event } from '@/lib/analytics';
 
 interface ActionButtonsProps {
@@ -21,19 +22,34 @@ export const ActionButtons = ({ targetRef }: ActionButtonsProps) => {
             // Wait for a moment to ensure any pending renders are done
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            const dataUrl = await toPng(targetRef.current, {
-                cacheBust: true,
-                backgroundColor: '#fff5f5', // Match the pastel background
-                pixelRatio: 3, // Higher quality
-                style: {
-                    overflow: 'hidden', // Ensure no scrollbars in capture
-                },
-            });
+            // Detect mobile device to adjust quality
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            const pixelRatio = isMobile ? 2 : 3; // Reduce ratio on mobile to avoid memory limits
 
-            const link = document.createElement('a');
-            link.href = dataUrl;
-            link.download = '2026_bucket_list_bingo.png';
-            link.click();
+            // Retry logic for Safari stability
+            let blob: Blob | null = null;
+            for (let i = 0; i < 3; i++) {
+                try {
+                    blob = await toBlob(targetRef.current, {
+                        cacheBust: true,
+                        backgroundColor: '#fff5f5',
+                        pixelRatio: pixelRatio,
+                        style: {
+                            overflow: 'hidden',
+                        },
+                        // Filter out elements that might cause issues if needed
+                        filter: (node) => !node.classList?.contains('exclude-from-capture'),
+                    });
+                    if (blob) break;
+                } catch (e) {
+                    console.warn(`Attempt ${i + 1} failed`, e);
+                    await new Promise(resolve => setTimeout(resolve, 500)); // Wait before retry
+                }
+            }
+
+            if (!blob) throw new Error('Failed to generate image blob');
+
+            saveAs(blob, '2026_bucket_list_bingo.png');
 
             event({
                 action: 'image_download',

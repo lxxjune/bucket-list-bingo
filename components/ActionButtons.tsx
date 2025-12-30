@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Download, Share2, Check } from 'lucide-react';
-import { toBlob } from 'html-to-image';
+import { toJpeg } from 'html-to-image';
 import { saveAs } from 'file-saver';
 import { event } from '@/lib/analytics';
 
@@ -22,34 +22,55 @@ export const ActionButtons = ({ targetRef }: ActionButtonsProps) => {
             // Wait for a moment to ensure any pending renders are done
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            // Detect mobile device to adjust quality
+            // Detect mobile device
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            const pixelRatio = isMobile ? 2 : 3; // Reduce ratio on mobile to avoid memory limits
+            const pixelRatio = isMobile ? 2 : 3;
 
-            // Retry logic for Safari stability
-            let blob: Blob | null = null;
+            // Retry logic
+            let dataUrl = '';
             for (let i = 0; i < 3; i++) {
                 try {
-                    blob = await toBlob(targetRef.current, {
+                    dataUrl = await toJpeg(targetRef.current, {
+                        quality: 0.95,
                         cacheBust: true,
                         backgroundColor: '#fff5f5',
                         pixelRatio: pixelRatio,
                         style: {
                             overflow: 'hidden',
                         },
-                        // Filter out elements that might cause issues if needed
                         filter: (node) => !node.classList?.contains('exclude-from-capture'),
                     });
-                    if (blob) break;
+                    if (dataUrl) break;
                 } catch (e) {
                     console.warn(`Attempt ${i + 1} failed`, e);
-                    await new Promise(resolve => setTimeout(resolve, 500)); // Wait before retry
+                    await new Promise(resolve => setTimeout(resolve, 500));
                 }
             }
 
-            if (!blob) throw new Error('Failed to generate image blob');
+            if (!dataUrl) throw new Error('Failed to generate image');
 
-            saveAs(blob, '2026_bucket_list_bingo.png');
+            // Convert DataURL to Blob for file-saver / sharing
+            const res = await fetch(dataUrl);
+            const blob = await res.blob();
+            const file = new File([blob], '2026_bucket_list_bingo.jpg', { type: 'image/jpeg' });
+
+            // Use Web Share API ONLY on Mobile
+            if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        files: [file],
+                        title: '2026 Bucket List Bingo',
+                        text: '내 2026년 버킷리스트 빙고! 🎯',
+                    });
+                } catch (err) {
+                    if ((err as Error).name !== 'AbortError') {
+                        saveAs(blob, '2026_bucket_list_bingo.jpg');
+                    }
+                }
+            } else {
+                // Desktop: Direct Download (Pinterest style)
+                saveAs(blob, '2026_bucket_list_bingo.jpg');
+            }
 
             event({
                 action: 'image_download',

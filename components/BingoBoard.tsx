@@ -35,26 +35,21 @@ export const BingoBoard = React.forwardRef<HTMLDivElement, BingoBoardProps>(
                 {data.map((text, index) => (
                     <div
                         key={index}
-                        className="aspect-square relative group"
+                        className="aspect-square relative group flex items-center justify-center cursor-text bg-white/80 rounded-lg border border-indigo-100 focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-200 transition-all"
+                        onClick={(e) => {
+                            const textarea = e.currentTarget.querySelector('textarea');
+                            textarea?.focus();
+                        }}
                     >
                         <textarea
                             value={text}
                             onChange={(e) => handleChange(index, e.target.value)}
-                            className="w-full h-full p-2 text-center text-sm sm:text-base resize-none bg-white/80 rounded-lg border border-indigo-100 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 outline-none transition-all flex items-center justify-center placeholder:text-gray-300 overflow-hidden"
+                            rows={1}
+                            className="w-full bg-transparent p-1 text-center text-sm md:text-lg lg:text-xl font-medium resize-none outline-none overflow-hidden"
                             placeholder=""
                             maxLength={20}
+                            style={{ fieldSizing: 'content' } as React.CSSProperties}
                         />
-                        {/* Center the text vertically using flex behavior on textarea is tricky, 
-                so we rely on padding or line-height, or use a flex container if not using textarea.
-                Actually, for a simple bingo, textarea is fine. Let's add some style to center it.
-            */}
-                        <style jsx>{`
-              textarea {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-              }
-            `}</style>
                     </div>
                 ))}
             </div>

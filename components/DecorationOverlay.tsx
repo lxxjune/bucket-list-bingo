@@ -53,9 +53,14 @@ export const DecorationOverlay = forwardRef<DecorationOverlayRef, DecorationOver
         return (
             <div
                 className="absolute top-0 left-0 w-full h-full z-20 touch-none"
-                onPointerDown={() => onDragStart?.()}
-                onPointerUp={() => onDragEnd?.()}
-                onPointerLeave={() => onDragEnd?.()}
+                // Use capture phase to detect events before the canvas consumes them
+                onPointerDownCapture={() => onDragStart?.()}
+                onPointerUpCapture={() => onDragEnd?.()}
+                onPointerCancelCapture={() => onDragEnd?.()}
+                // Add explicit touch handlers for mobile robustness
+                onTouchStartCapture={() => onDragStart?.()}
+                onTouchEndCapture={() => onDragEnd?.()}
+                onTouchCancelCapture={() => onDragEnd?.()}
             >
                 <ReactSketchCanvas
                     ref={canvasRef}

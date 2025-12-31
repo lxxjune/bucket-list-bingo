@@ -60,57 +60,11 @@ export default function Home() {
   // Tracking State
   const [hasDrawn, setHasDrawn] = useState(false);
 
-  // Fixed Resolution & Scaling Logic
-  const FIXED_WIDTH = 360;
-  const FIXED_HEIGHT = 640;
-  const [scale, setScale] = useState(1);
-
-  // Handle Grid Size Change
-  useEffect(() => {
-    const totalCells = gridSize * gridSize;
-    setBingoData(prev => {
-      const newData = Array(totalCells).fill('');
-      // Preserve existing data up to the new size
-      for (let i = 0; i < Math.min(prev.length, totalCells); i++) {
-        newData[i] = prev[i];
-      }
-      return newData;
-    });
-  }, [gridSize]);
-
-  // Scroll Lock Effect
-  useEffect(() => {
-    const updateScale = () => {
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      const PADDING = 32; // 16px * 2
-
-      if (isDecorationMode) {
-        // Full Screen Mode: Fit to screen while maintaining aspect ratio
-        const availableWidth = viewportWidth - PADDING;
-        const availableHeight = viewportHeight - PADDING; // Adjust for toolbars if needed
-        const scaleX = availableWidth / FIXED_WIDTH;
-        const scaleY = availableHeight / FIXED_HEIGHT;
-        setScale(Math.min(scaleX, scaleY));
-      } else {
-        // Normal Mode: Fit to width, but cap max width for desktop
-        // Max width for normal mode is usually constrained by the layout (e.g. max-w-2xl)
-        // We want it to be responsive.
-        const availableWidth = Math.min(viewportWidth, 600) - PADDING; // Cap width
-        const s = availableWidth / FIXED_WIDTH;
-        setScale(s);
-      }
-    };
-
-    updateScale();
-    window.addEventListener('resize', updateScale);
-    return () => window.removeEventListener('resize', updateScale);
-  }, [isDecorationMode]);
-
   // Scroll Lock Effect
   useEffect(() => {
     if (isDecorationMode) {
       document.body.style.overflow = 'hidden';
+      // Optional: Scroll the card into view if needed, but for now let's just lock
     } else {
       document.body.style.overflow = '';
     }
@@ -141,7 +95,7 @@ export default function Home() {
       </header>
 
       {/* Controls */}
-      <div className="flex flex-col gap-3 mb-12 w-full max-w-md">
+      <div className="flex flex-col gap-3 mb-12 w-full max-w-[480px]">
         {/* Row 1: Period Toggle */}
         <div className="flex w-full bg-white border border-gray-200 rounded-full p-1">
           {(['Yearly', 'Monthly'] as Period[]).map((p) => (
@@ -185,125 +139,92 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Full Screen Wrapper */}
+      {/* Capture Area (The Card) - In-place, Responsive */}
       <div
+        ref={captureRef}
         className={cn(
-          "transition-all duration-300 flex items-center justify-center",
-          isDecorationMode
-            ? "fixed inset-0 z-40 bg-white/95 p-4 backdrop-blur-sm"
-            : "w-full relative flex justify-center"
+          "bg-white relative overflow-hidden flex flex-col items-center shadow-md rounded-3xl mx-auto transition-shadow duration-300",
+          "w-full max-w-[480px] aspect-[9/16]", // Responsive width with fixed aspect ratio
+          isDecorationMode ? "shadow-2xl ring-2 ring-black/5" : "shadow-md"
         )}
-        style={
-          !isDecorationMode
-            ? {
-              // When using zoom, the element takes up more space in the layout.
-              // We don't need to manually set height if the container is flex.
-              // But to be safe, we can let it flow.
-            }
-            : undefined
-        }
       >
-        {/* Capture Area (The Card) - Responsive Container */}
-        <div
-          ref={captureRef}
-          className={cn(
-            "bg-white relative overflow-hidden flex flex-col items-center shadow-md md:rounded-3xl p-6 md:p-12",
-            isDecorationMode ? "shadow-2xl" : "shadow-md"
-          )}
-          style={{
-            width: `${FIXED_WIDTH * scale}px`,
-            height: `${FIXED_HEIGHT * scale}px`,
-            // No transform or zoom here!
-          }}
-        >
-          {/* Content Wrapper - Fixed Resolution & Scaled */}
-          <div
-            style={{
-              width: `${FIXED_WIDTH}px`,
-              height: `${FIXED_HEIGHT}px`,
-              transform: `scale(${scale})`,
-              transformOrigin: 'top left',
-              position: 'absolute',
-              top: 0,
-              left: 0,
+        {/* Absolute Draw Button (Visible only in normal mode) */}
+        {!isDecorationMode && (
+          <button
+            onClick={() => {
+              setIsDecorationMode(true);
+              trackEvent('open_draw_mode');
             }}
+            className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200 transition-all z-20 exclude-from-capture"
+            data-html2canvas-ignore
           >
-            {/* Absolute Draw Button (Visible only in normal mode) */}
-            {!isDecorationMode && (
-              <button
-                onClick={() => {
-                  setIsDecorationMode(true);
-                  trackEvent('open_draw_mode');
-                }}
-                className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200 transition-all z-20 exclude-from-capture"
-                data-html2canvas-ignore
-              >
-                <Palette size={20} />
-              </button>
-            )}
+            <Palette size={20} />
+          </button>
+        )}
 
-            {/* Grid Area */}
-            <div className="flex-1 w-full flex items-center justify-center relative h-full flex-col px-6">
-              <div className={cn("w-full transition-all", isDecorationMode && "pointer-events-none")}>
-                {/* Title Area - Moved inside to match grid width */}
-                <div className="w-full flex justify-between items-end mb-2">
-                  <h2
-                    className="text-4xl md:text-4xl text-[#1A1C20] font-black"
-                    style={{ fontFamily: 'var(--font-rem)' }}
-                  >
-                    {period === 'Yearly' ? '2026' : '01'}
-                  </h2>
-                  <span
-                    className="text-sm md:text-base text-[#1A1C20] font-bold"
-                    style={{ fontFamily: 'var(--font-rem)' }}
-                  >
-                    Bucket List
-                  </span>
-                </div>
-
-                <BingoBoard
-                  data={bingoData}
-                  onChange={handleCellChange}
-                  gridSize={gridSize}
-                  className="w-full shadow-none bg-transparent border-none"
-                />
-              </div>
-
-              {/* Footer Area */}
-              <div className="mt-2 mb-2 text-center w-full">
-                <p
-                  className="text-[#1A1C20] text-[12px] font-bold"
+        {/* Content Container */}
+        <div className="w-full h-full flex flex-col p-6 md:p-8">
+          {/* Grid Area */}
+          <div className="flex-1 w-full flex items-center justify-center relative flex-col">
+            <div className={cn("w-full transition-all", isDecorationMode && "pointer-events-none")}>
+              {/* Title Area */}
+              <div className="w-full flex justify-between items-end mb-4">
+                <h2
+                  className="text-4xl md:text-5xl text-[#1A1C20] font-black"
                   style={{ fontFamily: 'var(--font-rem)' }}
                 >
-                  Bucket List BINGO
-                </p>
-                <p className="text-gray-400 text-[10px]">www.bucketlist.design</p>
+                  {period === 'Yearly' ? '2026' : '01'}
+                </h2>
+                <span
+                  className="text-sm md:text-base text-[#1A1C20] font-bold mb-1"
+                  style={{ fontFamily: 'var(--font-rem)' }}
+                >
+                  Bucket List
+                </span>
               </div>
+
+              <BingoBoard
+                data={bingoData}
+                onChange={handleCellChange}
+                gridSize={gridSize}
+                className="w-full shadow-none bg-transparent border-none"
+              />
+            </div>
+
+            {/* Footer Area */}
+            <div className="mt-6 text-center w-full">
+              <p
+                className="text-[#1A1C20] text-[12px] font-bold"
+                style={{ fontFamily: 'var(--font-rem)' }}
+              >
+                Bucket List BINGO
+              </p>
+              <p className="text-gray-400 text-[10px]">www.bucketlist.design</p>
             </div>
           </div>
+        </div>
 
-          {/* Decoration Overlay - Covers entire capture area (Unscaled) */}
-          <div
-            ref={drawAreaRef}
-            className={cn(
-              "absolute inset-0 w-full h-full z-10",
-              isDecorationMode ? "pointer-events-auto" : "pointer-events-none"
-            )}
-          >
-            <DecorationOverlay
-              ref={decorationRef}
-              strokeColor={strokeColor}
-              strokeWidth={strokeWidth}
-              isEraser={isEraser}
-              isHighlighter={isHighlighter}
-              onStroke={() => {
-                if (!hasDrawn) {
-                  setHasDrawn(true);
-                  trackEvent('use_draw_tool');
-                }
-              }}
-            />
-          </div>
+        {/* Decoration Overlay - Covers entire capture area */}
+        <div
+          ref={drawAreaRef}
+          className={cn(
+            "absolute inset-0 w-full h-full z-10",
+            isDecorationMode ? "pointer-events-auto" : "pointer-events-none"
+          )}
+        >
+          <DecorationOverlay
+            ref={decorationRef}
+            strokeColor={strokeColor}
+            strokeWidth={strokeWidth}
+            isEraser={isEraser}
+            isHighlighter={isHighlighter}
+            onStroke={() => {
+              if (!hasDrawn) {
+                setHasDrawn(true);
+                trackEvent('use_draw_tool');
+              }
+            }}
+          />
         </div>
       </div>
 
@@ -365,7 +286,9 @@ export default function Home() {
         </>
       )}
       {!isDecorationMode && (
-        <ActionButtons targetRef={captureRef} gridSize={gridSize} isDecorated={hasDrawn} />
+        <div className="w-full max-w-[480px]">
+          <ActionButtons targetRef={captureRef} gridSize={gridSize} isDecorated={hasDrawn} />
+        </div>
       )}
 
       <footer className="text-center text-gray-400 text-xs pb-8 mt-8">

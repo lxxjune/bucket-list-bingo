@@ -113,8 +113,10 @@ export const ActionButtons = ({ targetRef, gridSize, isDecorated }: ActionButton
         }
     };
 
+
+
     return (
-        <div className="w-full flex gap-3 justify-center mt-8 mb-12 px-6">
+        <div className="w-full flex gap-3 justify-center mt-8">
             <button
                 onClick={handleSaveImage}
                 disabled={isSaving}

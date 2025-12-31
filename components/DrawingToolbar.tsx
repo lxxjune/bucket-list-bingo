@@ -32,96 +32,46 @@ export const DrawingToolbar = ({
     strokeWidth,
     setStrokeWidth,
     isEraser,
-    setIsEraser,
     isHighlighter,
-    setIsHighlighter,
-    onClear,
-}: DrawingToolbarProps) => {
+}: Omit<DrawingToolbarProps, 'setIsEraser' | 'setIsHighlighter' | 'onClear'>) => {
     return (
-        <div className="flex flex-col gap-4 p-4 bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-indigo-100 w-full max-w-md mx-auto mt-4 animate-in slide-in-from-bottom-5">
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-md px-6 z-50">
+            <div className="flex flex-col gap-6">
+                {/* Colors Row */}
+                {!isEraser && (
+                    <div className="flex items-center justify-between gap-2">
+                        {COLORS.map((color) => (
+                            <button
+                                key={color.name}
+                                onClick={() => setStrokeColor(color.value)}
+                                className={cn(
+                                    "w-8 h-8 rounded-full transition-all flex-shrink-0 relative",
+                                    strokeColor === color.value ? "scale-125 ring-2 ring-offset-2 ring-gray-200" : "hover:scale-110"
+                                )}
+                                style={{ backgroundColor: color.value }}
+                                title={color.name}
+                            >
+                                {strokeColor === color.value && (
+                                    <div className="absolute inset-0 rounded-full border border-black/10" />
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                )}
 
-            {/* Tools Row */}
-            <div className="flex items-center justify-between gap-2">
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => {
-                            setIsEraser(false);
-                            setIsHighlighter(false);
-                        }}
-                        className={cn(
-                            "p-2 rounded-lg transition-all",
-                            !isEraser && !isHighlighter ? "bg-indigo-100 text-indigo-600" : "hover:bg-gray-100 text-gray-500"
-                        )}
-                        title="기본 펜"
-                    >
-                        <Pen size={20} />
-                    </button>
-                    <button
-                        onClick={() => {
-                            setIsEraser(false);
-                            setIsHighlighter(true);
-                        }}
-                        className={cn(
-                            "p-2 rounded-lg transition-all",
-                            !isEraser && isHighlighter ? "bg-indigo-100 text-indigo-600" : "hover:bg-gray-100 text-gray-500"
-                        )}
-                        title="형광펜"
-                    >
-                        <Highlighter size={20} />
-                    </button>
-                    <button
-                        onClick={() => setIsEraser(true)}
-                        className={cn(
-                            "p-2 rounded-lg transition-all",
-                            isEraser ? "bg-indigo-100 text-indigo-600" : "hover:bg-gray-100 text-gray-500"
-                        )}
-                        title="지우개"
-                    >
-                        <Eraser size={20} />
-                    </button>
+                {/* Width Slider */}
+                <div className="flex items-center gap-4 bg-white/90 backdrop-blur-md p-3 rounded-full shadow-sm border border-gray-100">
+                    <span className="text-xs text-gray-500 font-medium w-8 text-center">두께</span>
+                    <input
+                        type="range"
+                        min="1"
+                        max={isHighlighter ? "40" : "20"}
+                        value={strokeWidth}
+                        onChange={(e) => setStrokeWidth(Number(e.target.value))}
+                        className="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                    />
+                    <span className="text-xs text-gray-500 w-6 text-center">{strokeWidth}</span>
                 </div>
-
-                <div className="h-6 w-px bg-gray-200" />
-
-                <button
-                    onClick={onClear}
-                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                    title="전체 지우기"
-                >
-                    <Trash2 size={20} />
-                </button>
-            </div>
-
-            {/* Colors Row */}
-            {!isEraser && (
-                <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1 scrollbar-hide">
-                    {COLORS.map((color) => (
-                        <button
-                            key={color.name}
-                            onClick={() => setStrokeColor(color.value)}
-                            className={cn(
-                                "w-8 h-8 rounded-full border-2 transition-all flex-shrink-0",
-                                strokeColor === color.value ? "border-gray-400 scale-110" : "border-transparent hover:scale-105"
-                            )}
-                            style={{ backgroundColor: color.value }}
-                            title={color.name}
-                        />
-                    ))}
-                </div>
-            )}
-
-            {/* Width Slider */}
-            <div className="flex items-center gap-3">
-                <span className="text-xs text-gray-500 font-medium w-8">두께</span>
-                <input
-                    type="range"
-                    min="1"
-                    max={isHighlighter ? "30" : "20"}
-                    value={strokeWidth}
-                    onChange={(e) => setStrokeWidth(Number(e.target.value))}
-                    className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                />
-                <span className="text-xs text-gray-500 w-6 text-right">{strokeWidth}</span>
             </div>
         </div>
     );

@@ -33,7 +33,7 @@ export const ActionButtons = ({ targetRef }: ActionButtonsProps) => {
                     dataUrl = await toJpeg(targetRef.current, {
                         quality: 0.95,
                         cacheBust: true,
-                        backgroundColor: '#fff5f5',
+                        backgroundColor: '#ffffff',
                         pixelRatio: pixelRatio,
                         style: {
                             overflow: 'hidden',
@@ -49,28 +49,12 @@ export const ActionButtons = ({ targetRef }: ActionButtonsProps) => {
 
             if (!dataUrl) throw new Error('Failed to generate image');
 
-            // Convert DataURL to Blob for file-saver / sharing
+            // Convert DataURL to Blob for file-saver
             const res = await fetch(dataUrl);
             const blob = await res.blob();
-            const file = new File([blob], '2026_bucket_list_bingo.jpg', { type: 'image/jpeg' });
 
-            // Use Web Share API ONLY on Mobile
-            if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
-                try {
-                    await navigator.share({
-                        files: [file],
-                        title: '2026 Bucket List Bingo',
-                        text: '내 2026년 버킷리스트 빙고! 🎯',
-                    });
-                } catch (err) {
-                    if ((err as Error).name !== 'AbortError') {
-                        saveAs(blob, '2026_bucket_list_bingo.jpg');
-                    }
-                }
-            } else {
-                // Desktop: Direct Download (Pinterest style)
-                saveAs(blob, '2026_bucket_list_bingo.jpg');
-            }
+            // Direct Download (Pinterest style) - Save to Gallery/Downloads
+            saveAs(blob, '2026_bucket_list_bingo.jpg');
 
             event({
                 action: 'image_download',
@@ -116,15 +100,15 @@ export const ActionButtons = ({ targetRef }: ActionButtonsProps) => {
             <button
                 onClick={handleSaveImage}
                 disabled={isSaving}
-                className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-lg hover:bg-indigo-700 active:scale-95 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-6 py-3 bg-[#2A3038] text-white rounded-xl font-bold shadow-lg hover:bg-black active:scale-95 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
             >
                 <Download size={20} />
-                {isSaving ? '저장 중...' : '이미지로 저장'}
+                {isSaving ? '저장 중...' : '이미지 저장'}
             </button>
 
             <button
                 onClick={handleShare}
-                className="flex items-center gap-2 px-6 py-3 bg-white text-indigo-600 border border-indigo-100 rounded-xl font-bold shadow-md hover:bg-indigo-50 active:scale-95 transition-all"
+                className="flex items-center gap-2 px-6 py-3 bg-white text-[#1A1C20] border border-[#1A1C20] rounded-xl font-bold shadow-md hover:bg-gray-50 active:scale-95 transition-all"
             >
                 {isCopied ? <Check size={20} /> : <Share2 size={20} />}
                 {isCopied ? '복사됨!' : '공유하기'}

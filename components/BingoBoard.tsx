@@ -8,14 +8,14 @@ interface BingoBoardProps {
     data: string[];
     onChange: (index: number, value: string) => void;
     className?: string;
+    gridSize: 3 | 4 | 5;
 }
 
 export const BingoBoard = React.forwardRef<HTMLDivElement, BingoBoardProps>(
-    ({ data, onChange, className }, ref) => {
+    ({ data, onChange, className, gridSize }, ref) => {
         const handleChange = (index: number, value: string) => {
             onChange(index, value);
             if (value.length === 1) {
-                // Track when user starts typing (length 1) to avoid spamming events
                 event({
                     action: 'bingo_cell_input',
                     category: 'interaction',
@@ -24,34 +24,42 @@ export const BingoBoard = React.forwardRef<HTMLDivElement, BingoBoardProps>(
             }
         };
 
+        const gridCols = {
+            3: 'grid-cols-3',
+            4: 'grid-cols-4',
+            5: 'grid-cols-5',
+        };
+
         return (
             <div
                 ref={ref}
                 className={cn(
-                    'grid grid-cols-5 gap-2 p-4 bg-white/50 backdrop-blur-sm rounded-xl shadow-lg border border-white/60',
+                    'w-full aspect-square bg-white border border-gray-400',
                     className
                 )}
             >
-                {data.map((text, index) => (
-                    <div
-                        key={index}
-                        className="aspect-square relative group flex items-center justify-center cursor-text bg-white/80 rounded-lg border border-indigo-100 focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-200 transition-all"
-                        onClick={(e) => {
-                            const textarea = e.currentTarget.querySelector('textarea');
-                            textarea?.focus();
-                        }}
-                    >
-                        <textarea
-                            value={text}
-                            onChange={(e) => handleChange(index, e.target.value)}
-                            rows={1}
-                            className="w-full bg-transparent p-1 text-center text-sm md:text-lg lg:text-xl font-medium resize-none outline-none overflow-hidden"
-                            placeholder=""
-                            maxLength={20}
-                            style={{ fieldSizing: 'content' } as React.CSSProperties}
-                        />
-                    </div>
-                ))}
+                <div className={cn("grid w-full h-full", gridCols[gridSize])}>
+                    {data.map((text, index) => (
+                        <div
+                            key={index}
+                            className="aspect-square relative group flex items-center justify-center cursor-text bg-white border-[0.5px] border-gray-300 hover:border-black focus-within:border-black transition-all"
+                            onClick={(e) => {
+                                const textarea = e.currentTarget.querySelector('textarea');
+                                textarea?.focus();
+                            }}
+                        >
+                            <textarea
+                                value={text}
+                                onChange={(e) => handleChange(index, e.target.value)}
+                                rows={1}
+                                className="w-full bg-transparent p-1 text-center text-sm md:text-base font-medium resize-none outline-none overflow-hidden text-gray-900 placeholder:text-gray-300"
+                                placeholder=""
+                                maxLength={20}
+                                style={{ fieldSizing: 'content' } as React.CSSProperties}
+                            />
+                        </div>
+                    ))}
+                </div>
             </div>
         );
     }

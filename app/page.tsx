@@ -1,16 +1,19 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { BingoBoard } from '@/components/BingoBoard';
-import { CategoryButtons } from '@/components/CategoryButtons';
 import { ActionButtons } from '@/components/ActionButtons';
-import { CategoryName } from '@/constants/bingoData';
 import { DecorationOverlay, DecorationOverlayRef } from '@/components/DecorationOverlay';
 import { DrawingToolbar } from '@/components/DrawingToolbar';
 import { Palette } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+type Period = 'Yearly' | 'Monthly';
+type GridSize = 3 | 4 | 5;
+
 export default function Home() {
+  const [period, setPeriod] = useState<Period>('Yearly');
+  const [gridSize, setGridSize] = useState<GridSize>(5);
   const [bingoData, setBingoData] = useState<string[]>(Array(25).fill(''));
   const captureRef = useRef<HTMLDivElement>(null);
 
@@ -22,93 +25,134 @@ export default function Home() {
   const [isHighlighter, setIsHighlighter] = useState(false);
   const decorationRef = useRef<DecorationOverlayRef>(null);
 
+  // Handle Grid Size Change
+  useEffect(() => {
+    const totalCells = gridSize * gridSize;
+    setBingoData(prev => {
+      const newData = Array(totalCells).fill('');
+      // Preserve existing data up to the new size
+      for (let i = 0; i < Math.min(prev.length, totalCells); i++) {
+        newData[i] = prev[i];
+      }
+      return newData;
+    });
+  }, [gridSize]);
+
   const handleCellChange = (index: number, value: string) => {
     const newData = [...bingoData];
     newData[index] = value;
     setBingoData(newData);
   };
 
-  const handleCategorySelect = (category: CategoryName, items: string[]) => {
-    setBingoData(items);
-  };
-
   return (
-    <main className="min-h-screen py-8 px-4 flex flex-col items-center md:max-w-2xl lg:max-w-3xl mx-auto transition-all duration-300">
+    <main className="min-h-screen py-12 px-4 flex flex-col items-center md:max-w-2xl lg:max-w-3xl mx-auto transition-all duration-300 font-sans">
+
+      {/* Header */}
       <header className="text-center mb-8">
-        <h1 className="text-3xl md:text-5xl font-black text-indigo-900 mb-2 tracking-tight">
-          2026<br />
-          <span className="text-indigo-600">MY BUCKET LIST</span><br />
-          BINGO
+        <h1 className="text-3xl md:text-4xl text-[#1A1C20] mb-2 tracking-tight font-rubik uppercase">
+          Bucket List Bingo
         </h1>
-        <p className="text-gray-500 text-sm md:text-base">
+        <p className="text-gray-500 text-sm">
           이루고 싶은 목표를 적고 빙고를 완성해보세요!
         </p>
       </header>
 
-      {/* Mode Toggle Button */}
-      <div className="w-full flex justify-end mb-4 px-2">
+      {/* Controls */}
+      <div className="flex flex-col gap-3 mb-12 w-full max-w-md">
+        {/* Row 1: Period Toggle */}
+        <div className="flex w-full bg-white border border-gray-200 rounded-full p-1 shadow-sm">
+          {(['Yearly', 'Monthly'] as Period[]).map((p) => (
+            <button
+              key={p}
+              onClick={() => setPeriod(p)}
+              className={cn(
+                "flex-1 py-2 rounded-full text-sm font-bold transition-all",
+                period === p
+                  ? "bg-[#2A3038] text-white shadow-md"
+                  : "text-gray-500 hover:bg-gray-50"
+              )}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+
+        {/* Row 2: Grid Size Toggle */}
+        <div className="flex w-full bg-white border border-gray-200 rounded-full p-1 shadow-sm">
+          {([3, 4, 5] as GridSize[]).map((size) => (
+            <button
+              key={size}
+              onClick={() => setGridSize(size)}
+              className={cn(
+                "flex-1 py-2 rounded-full text-sm font-bold transition-all",
+                gridSize === size
+                  ? "bg-[#2A3038] text-white shadow-md"
+                  : "text-gray-500 hover:bg-gray-50"
+              )}
+            >
+              {size}x{size}
+            </button>
+          ))}
+        </div>
+        {/* Row 3: Decoration Toggle */}
         <button
           onClick={() => setIsDecorationMode(!isDecorationMode)}
           className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-full font-bold shadow-sm transition-all",
+            "w-full py-2 rounded-full text-sm font-bold border transition-all flex items-center justify-center gap-2",
             isDecorationMode
-              ? "bg-indigo-600 text-white shadow-indigo-200"
-              : "bg-white text-indigo-600 border border-indigo-100 hover:bg-indigo-50"
+              ? "bg-[#2A3038] text-white border-[#2A3038] shadow-md"
+              : "bg-white text-[#1A1C20] border-gray-200 hover:bg-gray-50"
           )}
         >
-          <Palette size={18} />
-          {isDecorationMode ? '꾸미기 완료' : '꾸미기 모드'}
+          <Palette size={16} />
+          {isDecorationMode ? '꾸미기 완료 (Done)' : '꾸미기 (Draw)'}
         </button>
       </div>
-
-      {!isDecorationMode && (
-        <CategoryButtons onCategorySelect={handleCategorySelect} />
-      )}
 
       {/* Capture Area */}
       <div
         ref={captureRef}
-        className="w-full bg-white/40 backdrop-blur-sm p-6 md:p-10 rounded-3xl shadow-2xl border border-white/50 relative overflow-hidden transition-all duration-300"
-        style={{ aspectRatio: '9/16', display: 'flex', flexDirection: 'column' }}
+        className="w-full bg-white p-8 md:p-12 relative overflow-hidden flex flex-col items-center shadow-2xl md:rounded-3xl"
+        style={{ aspectRatio: '9/16' }}
       >
-        {/* Decorative Background Elements for Capture */}
-        <div className="absolute top-0 left-0 w-full h-full -z-10 bg-gradient-to-br from-pink-50 via-white to-blue-50 opacity-80" />
-
-        <div className="text-center mb-6 mt-4">
-          <h2 className="text-2xl md:text-4xl font-extrabold text-indigo-800 tracking-widest">2026 BUCKET LIST</h2>
-          <div className="w-16 md:w-24 h-1 bg-indigo-400 mx-auto mt-2 rounded-full" />
-        </div>
-
-        <div className="flex-1 flex items-center justify-center relative">
+        {/* Grid Area */}
+        <div className="flex-1 w-full flex items-center justify-center relative">
           <div className={cn("w-full transition-all", isDecorationMode && "pointer-events-none")}>
+            {/* Title Area - Moved inside to match grid width */}
+            <div className="w-full flex justify-between items-end mb-2">
+              <h2 className="text-4xl md:text-4xl text-[#1A1C20] tracking-tighter leading-none font-rubik">
+                {period === 'Yearly' ? '2026' : '01'}
+              </h2>
+              <span className="text-base md:text-sm text-[#1A1C20] font-rubik">Bucket List</span>
+            </div>
+
             <BingoBoard
               data={bingoData}
               onChange={handleCellChange}
+              gridSize={gridSize}
               className="w-full shadow-none bg-transparent border-none"
-            />
-          </div>
-
-          {/* Decoration Overlay - Always rendered but hidden/inactive when not in mode? 
-              Actually, we want it always visible so drawings persist. 
-              But pointer-events should be toggled. 
-          */}
-          <div className={cn(
-            "absolute top-0 left-0 w-full h-full transition-all",
-            isDecorationMode ? "pointer-events-auto z-10" : "pointer-events-none z-10"
-          )}>
-            <DecorationOverlay
-              ref={decorationRef}
-              strokeColor={strokeColor}
-              strokeWidth={strokeWidth}
-              isEraser={isEraser}
-              isHighlighter={isHighlighter}
             />
           </div>
         </div>
 
-        <div className="mt-6 mb-4 text-center">
-          <p className="text-indigo-900 font-bold text-sm md:text-lg">@2026_bucket_bingo</p>
-          <p className="text-gray-400 text-[10px] md:text-sm mt-1">bucket-list-bingo.vercel.app</p>
+        {/* Footer Area */}
+        <div className="mt-2 mb-2 text-center">
+          <p className="text-[#1A1C20] text-md font-bold">Bucket List BINGO</p>
+          <p className="text-gray-400 text-xs mt-1">bucket-list-bingo.vercel.app</p>
+        </div>
+
+        {/* Decoration Overlay - Covers entire capture area */}
+        <div className={cn(
+          "absolute top-0 left-0 w-full h-full transition-all",
+          isDecorationMode ? "pointer-events-auto z-10" : "pointer-events-none z-10"
+        )}>
+          <DecorationOverlay
+            ref={decorationRef}
+            strokeColor={strokeColor}
+            strokeWidth={strokeWidth}
+            isEraser={isEraser}
+            isHighlighter={isHighlighter}
+          />
         </div>
       </div>
 

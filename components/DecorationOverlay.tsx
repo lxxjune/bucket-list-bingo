@@ -9,8 +9,6 @@ interface DecorationOverlayProps {
     isEraser: boolean;
     isHighlighter: boolean;
     onStroke?: () => void;
-    onDragStart?: () => void;
-    onDragEnd?: () => void;
 }
 
 export interface DecorationOverlayRef {
@@ -20,7 +18,7 @@ export interface DecorationOverlayRef {
 }
 
 export const DecorationOverlay = forwardRef<DecorationOverlayRef, DecorationOverlayProps>(
-    ({ strokeColor, strokeWidth, isEraser, isHighlighter, onStroke, onDragStart, onDragEnd }, ref) => {
+    ({ strokeColor, strokeWidth, isEraser, isHighlighter, onStroke }, ref) => {
         const canvasRef = useRef<ReactSketchCanvasRef>(null);
 
         useImperativeHandle(ref, () => ({
@@ -51,17 +49,7 @@ export const DecorationOverlay = forwardRef<DecorationOverlayRef, DecorationOver
         };
 
         return (
-            <div
-                className="absolute top-0 left-0 w-full h-full z-20 touch-none"
-                // Use capture phase to detect events before the canvas consumes them
-                onPointerDownCapture={() => onDragStart?.()}
-                onPointerUpCapture={() => onDragEnd?.()}
-                onPointerCancelCapture={() => onDragEnd?.()}
-                // Add explicit touch handlers for mobile robustness
-                onTouchStartCapture={() => onDragStart?.()}
-                onTouchEndCapture={() => onDragEnd?.()}
-                onTouchCancelCapture={() => onDragEnd?.()}
-            >
+            <div className="absolute top-0 left-0 w-full h-full z-20 touch-none">
                 <ReactSketchCanvas
                     ref={canvasRef}
                     width="100%"

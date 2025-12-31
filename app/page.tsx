@@ -27,6 +27,36 @@ export default function Home() {
   const [isHighlighter, setIsHighlighter] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
   const decorationRef = useRef<DecorationOverlayRef>(null);
+  const drawAreaRef = useRef<HTMLDivElement>(null);
+
+  // Native Event Listener for Drawing State (Fix for Mobile/Safari)
+  useEffect(() => {
+    const element = drawAreaRef.current;
+    if (!element || !isDecorationMode) return;
+
+    const handleStart = () => setIsDrawing(true);
+    const handleEnd = () => setIsDrawing(false);
+
+    // Use capture: true to intercept events before react-sketch-canvas consumes them
+    element.addEventListener('pointerdown', handleStart, { capture: true });
+    element.addEventListener('pointerup', handleEnd, { capture: true });
+    element.addEventListener('pointerleave', handleEnd, { capture: true });
+
+    // Add explicit touch events for broader mobile support (iOS)
+    element.addEventListener('touchstart', handleStart, { capture: true });
+    element.addEventListener('touchend', handleEnd, { capture: true });
+    element.addEventListener('touchcancel', handleEnd, { capture: true });
+
+    return () => {
+      element.removeEventListener('pointerdown', handleStart, { capture: true });
+      element.removeEventListener('pointerup', handleEnd, { capture: true });
+      element.removeEventListener('pointerleave', handleEnd, { capture: true });
+
+      element.removeEventListener('touchstart', handleStart, { capture: true });
+      element.removeEventListener('touchend', handleEnd, { capture: true });
+      element.removeEventListener('touchcancel', handleEnd, { capture: true });
+    };
+  }, [isDecorationMode]);
 
   // Tracking State
   const [hasDrawn, setHasDrawn] = useState(false);
@@ -255,6 +285,7 @@ export default function Home() {
 
           {/* Decoration Overlay - Covers entire capture area (Unscaled) */}
           <div
+            ref={drawAreaRef}
             className={cn(
               "absolute inset-0 w-full h-full z-10",
               isDecorationMode ? "pointer-events-auto" : "pointer-events-none"
@@ -266,8 +297,6 @@ export default function Home() {
               strokeWidth={strokeWidth}
               isEraser={isEraser}
               isHighlighter={isHighlighter}
-              onDragStart={() => setIsDrawing(true)}
-              onDragEnd={() => setIsDrawing(false)}
               onStroke={() => {
                 if (!hasDrawn) {
                   setHasDrawn(true);

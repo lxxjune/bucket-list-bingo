@@ -50,12 +50,12 @@ export const BingoBoard = React.forwardRef<HTMLDivElement, BingoBoardProps>(
                                 rows={1}
                                 className={cn(
                                     "w-full bg-transparent text-center font-medium resize-none outline-none text-gray-700 placeholder:text-gray-300 leading-tight max-h-full",
-                                    text.length > 12 ? "text-[10px] md:text-xs" :
-                                        text.length > 8 ? "text-xs md:text-sm" :
+                                    text.length > 10 ? "text-[10px] md:text-xs" :
+                                        text.length > 6 ? "text-xs md:text-sm" :
                                             "text-sm md:text-base"
                                 )}
                                 placeholder=""
-                                maxLength={18}
+                                maxLength={15}
                                 style={{ fieldSizing: 'content' } as React.CSSProperties}
                             />
                         </div>

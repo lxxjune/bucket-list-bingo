@@ -25,6 +25,7 @@ export default function Home() {
   const [strokeWidth, setStrokeWidth] = useState(4);
   const [isEraser, setIsEraser] = useState(false);
   const [isHighlighter, setIsHighlighter] = useState(false);
+  const [isDrawing, setIsDrawing] = useState(false);
   const decorationRef = useRef<DecorationOverlayRef>(null);
 
   // Tracking State
@@ -265,6 +266,8 @@ export default function Home() {
               strokeWidth={strokeWidth}
               isEraser={isEraser}
               isHighlighter={isHighlighter}
+              onDragStart={() => setIsDrawing(true)}
+              onDragEnd={() => setIsDrawing(false)}
               onStroke={() => {
                 if (!hasDrawn) {
                   setHasDrawn(true);
@@ -276,26 +279,64 @@ export default function Home() {
         </div>
       </div>
 
-      {isDecorationMode ? (
+      {isDecorationMode && (
         <>
-          <DrawingTopBar
-            onUndo={() => decorationRef.current?.undo()}
-            onDone={() => setIsDecorationMode(false)}
-            isEraser={isEraser}
-            setIsEraser={setIsEraser}
-            isHighlighter={isHighlighter}
-            setIsHighlighter={setIsHighlighter}
-          />
-          <DrawingToolbar
-            strokeColor={strokeColor}
-            setStrokeColor={setStrokeColor}
-            strokeWidth={strokeWidth}
-            setStrokeWidth={setStrokeWidth}
-            isEraser={isEraser}
-            isHighlighter={isHighlighter}
-          />
+          {/* Top Bar */}
+          <div className={cn(
+            "fixed top-0 left-0 w-full z-50 transition-opacity duration-200",
+            isDrawing ? "opacity-0 pointer-events-none" : "opacity-100"
+          )}>
+            <DrawingTopBar
+              onUndo={() => {
+                decorationRef.current?.undo();
+                trackEvent('click_undo');
+              }}
+              onDone={() => {
+                setIsDecorationMode(false);
+                setHasDrawn(false);
+                trackEvent('click_done_drawing');
+              }}
+              activeTool={isEraser ? 'eraser' : isHighlighter ? 'highlighter' : 'pen'}
+              onToolChange={(tool) => {
+                if (tool === 'eraser') {
+                  setIsEraser(true);
+                  setIsHighlighter(false);
+                } else if (tool === 'highlighter') {
+                  setIsEraser(false);
+                  setIsHighlighter(true);
+                  setStrokeWidth(15);
+                } else {
+                  setIsEraser(false);
+                  setIsHighlighter(false);
+                  setStrokeWidth(4);
+                }
+              }}
+            />
+          </div>
+
+          {/* Bottom Toolbar */}
+          <div className={cn(
+            "fixed bottom-0 left-0 w-full z-50 transition-opacity duration-200",
+            isDrawing ? "opacity-0 pointer-events-none" : "opacity-100"
+          )}>
+            <DrawingToolbar
+              color={strokeColor}
+              setColor={(color) => {
+                setStrokeColor(color);
+                trackEvent('select_color', { color_hex: color });
+              }}
+              strokeWidth={strokeWidth}
+              setStrokeWidth={(width) => {
+                setStrokeWidth(width);
+                trackEvent('change_thickness', { width });
+              }}
+              isEraser={isEraser}
+              setIsEraser={setIsEraser}
+            />
+          </div>
         </>
-      ) : (
+      )}
+      {!isDecorationMode && (
         <ActionButtons targetRef={captureRef} gridSize={gridSize} isDecorated={hasDrawn} />
       )}
 

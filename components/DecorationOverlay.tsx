@@ -9,6 +9,8 @@ interface DecorationOverlayProps {
     isEraser: boolean;
     isHighlighter: boolean;
     onStroke?: () => void;
+    onDragStart?: () => void;
+    onDragEnd?: () => void;
 }
 
 export interface DecorationOverlayRef {
@@ -18,7 +20,7 @@ export interface DecorationOverlayRef {
 }
 
 export const DecorationOverlay = forwardRef<DecorationOverlayRef, DecorationOverlayProps>(
-    ({ strokeColor, strokeWidth, isEraser, isHighlighter, onStroke }, ref) => {
+    ({ strokeColor, strokeWidth, isEraser, isHighlighter, onStroke, onDragStart, onDragEnd }, ref) => {
         const canvasRef = useRef<ReactSketchCanvasRef>(null);
 
         useImperativeHandle(ref, () => ({
@@ -49,7 +51,12 @@ export const DecorationOverlay = forwardRef<DecorationOverlayRef, DecorationOver
         };
 
         return (
-            <div className="absolute top-0 left-0 w-full h-full z-20 touch-none">
+            <div
+                className="absolute top-0 left-0 w-full h-full z-20 touch-none"
+                onPointerDown={() => onDragStart?.()}
+                onPointerUp={() => onDragEnd?.()}
+                onPointerLeave={() => onDragEnd?.()}
+            >
                 <ReactSketchCanvas
                     ref={canvasRef}
                     width="100%"

@@ -13,5 +13,5 @@ body {
 }
 
 @theme {
-  --font-rubik: var(--font-rubik), sans-serif;
+  --font-rem: var(--font-rem), sans-serif;
 }

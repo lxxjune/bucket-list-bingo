@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Noto_Sans_KR, Rubik_Mono_One } from "next/font/google";
+import { Noto_Sans_KR, REM } from "next/font/google";
 import Script from "next/script";
 import { GA_TRACKING_ID } from "@/lib/analytics";
 import "./globals.css";
@@ -10,10 +10,10 @@ const notoSansKr = Noto_Sans_KR({
   variable: "--font-noto-sans-kr",
 });
 
-const rubik = Rubik_Mono_One({
+const rem = REM({
   subsets: ["latin"],
-  weight: "400",
-  variable: "--font-rubik",
+  variable: "--font-rem",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -46,7 +46,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${notoSansKr.variable} ${rubik.variable} antialiased font-sans`}>
+      <body className={`${notoSansKr.variable} ${rem.variable} antialiased font-sans`}>
         {children}
       </body>
     </html>

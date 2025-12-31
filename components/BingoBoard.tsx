@@ -42,7 +42,7 @@ export const BingoBoard = React.forwardRef<HTMLDivElement, BingoBoardProps>(
                     {data.map((text, index) => (
                         <div
                             key={index}
-                            className="aspect-square relative group flex items-center justify-center cursor-text bg-white border-[0.5px] border-gray-300 hover:border-black focus-within:border-black transition-all"
+                            className="aspect-square relative group flex items-center justify-center cursor-text bg-white border-[0.5px] border-gray-300 hover:border-black focus-within:border-black transition-all overflow-hidden p-1"
                             onClick={(e) => {
                                 const textarea = e.currentTarget.querySelector('textarea');
                                 textarea?.focus();
@@ -52,7 +52,12 @@ export const BingoBoard = React.forwardRef<HTMLDivElement, BingoBoardProps>(
                                 value={text}
                                 onChange={(e) => handleChange(index, e.target.value)}
                                 rows={1}
-                                className="w-full bg-transparent p-1 text-center text-sm md:text-base font-medium resize-none outline-none overflow-hidden text-gray-900 placeholder:text-gray-300"
+                                className={cn(
+                                    "w-full bg-transparent text-center font-medium resize-none outline-none text-gray-900 placeholder:text-gray-300 leading-tight max-h-full",
+                                    text.length > 12 ? "text-[10px] md:text-xs" :
+                                        text.length > 8 ? "text-xs md:text-sm" :
+                                            "text-sm md:text-base"
+                                )}
                                 placeholder=""
                                 maxLength={20}
                                 style={{ fieldSizing: 'content' } as React.CSSProperties}

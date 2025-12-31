@@ -47,9 +47,11 @@ export default function Home() {
   return (
     <main className="min-h-screen py-12 px-4 flex flex-col items-center md:max-w-2xl lg:max-w-3xl mx-auto transition-all duration-300 font-sans">
 
-      {/* Header */}
       <header className="text-center mb-8">
-        <h1 className="text-3xl md:text-4xl text-[#1A1C20] mb-2 tracking-tight font-rubik uppercase">
+        <h1
+          className="text-3xl md:text-4xl text-[#1A1C20] mb-1 uppercase font-black"
+          style={{ fontFamily: 'var(--font-rem)' }}
+        >
           Bucket List Bingo
         </h1>
         <p className="text-gray-500 text-sm">
@@ -60,7 +62,7 @@ export default function Home() {
       {/* Controls */}
       <div className="flex flex-col gap-3 mb-12 w-full max-w-md">
         {/* Row 1: Period Toggle */}
-        <div className="flex w-full bg-white border border-gray-200 rounded-full p-1 shadow-sm">
+        <div className="flex w-full bg-white border border-gray-200 rounded-full p-1">
           {(['Yearly', 'Monthly'] as Period[]).map((p) => (
             <button
               key={p}
@@ -68,7 +70,7 @@ export default function Home() {
               className={cn(
                 "flex-1 py-2 rounded-full text-sm font-bold transition-all",
                 period === p
-                  ? "bg-[#2A3038] text-white shadow-md"
+                  ? "bg-[#2A3038] text-white"
                   : "text-gray-500 hover:bg-gray-50"
               )}
             >
@@ -78,7 +80,7 @@ export default function Home() {
         </div>
 
         {/* Row 2: Grid Size Toggle */}
-        <div className="flex w-full bg-white border border-gray-200 rounded-full p-1 shadow-sm">
+        <div className="flex w-full bg-white border border-gray-200 rounded-full p-1">
           {([3, 4, 5] as GridSize[]).map((size) => (
             <button
               key={size}
@@ -86,7 +88,7 @@ export default function Home() {
               className={cn(
                 "flex-1 py-2 rounded-full text-sm font-bold transition-all",
                 gridSize === size
-                  ? "bg-[#2A3038] text-white shadow-md"
+                  ? "bg-[#2A3038] text-white"
                   : "text-gray-500 hover:bg-gray-50"
               )}
             >
@@ -112,7 +114,7 @@ export default function Home() {
       {/* Capture Area */}
       <div
         ref={captureRef}
-        className="w-full bg-white p-8 md:p-12 relative overflow-hidden flex flex-col items-center shadow-2xl md:rounded-3xl"
+        className="w-full bg-white p-6 md:p-12 relative overflow-hidden flex flex-col items-center shadow-md md:rounded-3xl"
         style={{ aspectRatio: '9/16' }}
       >
         {/* Grid Area */}
@@ -120,10 +122,18 @@ export default function Home() {
           <div className={cn("w-full transition-all", isDecorationMode && "pointer-events-none")}>
             {/* Title Area - Moved inside to match grid width */}
             <div className="w-full flex justify-between items-end mb-2">
-              <h2 className="text-4xl md:text-4xl text-[#1A1C20] tracking-tighter leading-none font-rubik">
+              <h2
+                className="text-4xl md:text-4xl text-[#1A1C20] font-black"
+                style={{ fontFamily: 'var(--font-rem)' }}
+              >
                 {period === 'Yearly' ? '2026' : '01'}
               </h2>
-              <span className="text-base md:text-sm text-[#1A1C20] font-rubik">Bucket List</span>
+              <span
+                className="text-sm md:text-base text-[#1A1C20] font-bold"
+                style={{ fontFamily: 'var(--font-rem)' }}
+              >
+                Bucket List
+              </span>
             </div>
 
             <BingoBoard
@@ -137,8 +147,13 @@ export default function Home() {
 
         {/* Footer Area */}
         <div className="mt-2 mb-2 text-center">
-          <p className="text-[#1A1C20] text-md font-bold">Bucket List BINGO</p>
-          <p className="text-gray-400 text-xs mt-1">bucket-list-bingo.vercel.app</p>
+          <p
+            className="text-[#1A1C20] text-sm font-bold"
+            style={{ fontFamily: 'var(--font-rem)' }}
+          >
+            Bucket List BINGO
+          </p>
+          <p className="text-gray-400 text-xs mt-0.5">bucket-list-bingo.vercel.app</p>
         </div>
 
         {/* Decoration Overlay - Covers entire capture area */}

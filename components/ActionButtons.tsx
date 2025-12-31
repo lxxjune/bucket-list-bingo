@@ -75,7 +75,7 @@ export const ActionButtons = ({ targetRef }: ActionButtonsProps) => {
         try {
             if (navigator.share) {
                 await navigator.share({
-                    title: '2026 신년 버킷리스트 빙고',
+                    title: '2026 버킷리스트 빙고',
                     text: '나만의 2026년 버킷리스트를 빙고로 만들어보세요!',
                     url: url,
                 });
@@ -95,22 +95,23 @@ export const ActionButtons = ({ targetRef }: ActionButtonsProps) => {
         }
     };
 
+
     return (
-        <div className="flex gap-3 justify-center mt-8 mb-12">
+        <div className="w-full flex gap-3 justify-center mt-8 mb-12 px-6">
             <button
                 onClick={handleSaveImage}
                 disabled={isSaving}
-                className="flex items-center gap-2 px-6 py-3 bg-[#2A3038] text-white rounded-xl font-bold shadow-lg hover:bg-black active:scale-95 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 px-2 py-3 bg-[#2A3038] text-white text-sm rounded-xl font-bold shadow-lg hover:bg-black active:scale-95 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
             >
-                <Download size={20} />
+                <Download size={16} />
                 {isSaving ? '저장 중...' : '이미지 저장'}
             </button>
 
             <button
                 onClick={handleShare}
-                className="flex items-center gap-2 px-6 py-3 bg-white text-[#1A1C20] border border-[#1A1C20] rounded-xl font-bold shadow-md hover:bg-gray-50 active:scale-95 transition-all"
+                className="w-full flex items-center justify-center gap-2 px-2 py-3 bg-white text-[#1A1C20] text-sm border border-[#EEEFF1] rounded-xl font-bold shadow-md hover:bg-gray-50 active:scale-95 transition-all"
             >
-                {isCopied ? <Check size={20} /> : <Share2 size={20} />}
+                {isCopied ? <Check size={16} /> : <Share2 size={16} />}
                 {isCopied ? '복사됨!' : '공유하기'}
             </button>
         </div>

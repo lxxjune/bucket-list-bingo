@@ -30,6 +30,11 @@ export default function Home() {
   // Tracking State
   const [hasDrawn, setHasDrawn] = useState(false);
 
+  // Fixed Resolution & Scaling Logic
+  const FIXED_WIDTH = 360;
+  const FIXED_HEIGHT = 640;
+  const [scale, setScale] = useState(1);
+
   // Handle Grid Size Change
   useEffect(() => {
     const totalCells = gridSize * gridSize;
@@ -42,6 +47,35 @@ export default function Home() {
       return newData;
     });
   }, [gridSize]);
+
+  // Scroll Lock Effect
+  useEffect(() => {
+    const updateScale = () => {
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const PADDING = 32; // 16px * 2
+
+      if (isDecorationMode) {
+        // Full Screen Mode: Fit to screen while maintaining aspect ratio
+        const availableWidth = viewportWidth - PADDING;
+        const availableHeight = viewportHeight - PADDING; // Adjust for toolbars if needed
+        const scaleX = availableWidth / FIXED_WIDTH;
+        const scaleY = availableHeight / FIXED_HEIGHT;
+        setScale(Math.min(scaleX, scaleY));
+      } else {
+        // Normal Mode: Fit to width, but cap max width for desktop
+        // Max width for normal mode is usually constrained by the layout (e.g. max-w-2xl)
+        // We want it to be responsive.
+        const availableWidth = Math.min(viewportWidth, 600) - PADDING; // Cap width
+        const s = availableWidth / FIXED_WIDTH;
+        setScale(s);
+      }
+    };
+
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    return () => window.removeEventListener('resize', updateScale);
+  }, [isDecorationMode]);
 
   // Scroll Lock Effect
   useEffect(() => {
@@ -126,81 +160,105 @@ export default function Home() {
         className={cn(
           "transition-all duration-300 flex items-center justify-center",
           isDecorationMode
-            ? "fixed inset-0 z-40 bg-white p-4"
-            : "w-full relative"
+            ? "fixed inset-0 z-40 bg-white/95 p-4 backdrop-blur-sm"
+            : "w-full relative flex justify-center"
         )}
+        style={
+          !isDecorationMode
+            ? {
+              // When using zoom, the element takes up more space in the layout.
+              // We don't need to manually set height if the container is flex.
+              // But to be safe, we can let it flow.
+            }
+            : undefined
+        }
       >
-        {/* Capture Area (The Card) */}
+        {/* Capture Area (The Card) - Responsive Container */}
         <div
           ref={captureRef}
           className={cn(
-            "bg-white relative overflow-hidden flex flex-col items-center shadow-md md:rounded-3xl transition-all p-6 md:p-12",
-            isDecorationMode
-              ? "w-full h-full max-w-md max-h-[80vh] shadow-none" // In full screen, fit within view
-              : "w-full aspect-[9/16]" // Normal mode
+            "bg-white relative overflow-hidden flex flex-col items-center shadow-md md:rounded-3xl p-6 md:p-12",
+            isDecorationMode ? "shadow-2xl" : "shadow-md"
           )}
-          style={{ aspectRatio: '9/16' }}
+          style={{
+            width: `${FIXED_WIDTH * scale}px`,
+            height: `${FIXED_HEIGHT * scale}px`,
+            // No transform or zoom here!
+          }}
         >
-          {/* Absolute Draw Button (Visible only in normal mode) */}
-          {!isDecorationMode && (
-            <button
-              onClick={() => {
-                setIsDecorationMode(true);
-                trackEvent('open_draw_mode');
-              }}
-              className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200 transition-all z-20"
-              data-html2canvas-ignore
-            >
-              <Palette size={20} />
-            </button>
-          )}
+          {/* Content Wrapper - Fixed Resolution & Scaled */}
+          <div
+            style={{
+              width: `${FIXED_WIDTH}px`,
+              height: `${FIXED_HEIGHT}px`,
+              transform: `scale(${scale})`,
+              transformOrigin: 'top left',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+            }}
+          >
+            {/* Absolute Draw Button (Visible only in normal mode) */}
+            {!isDecorationMode && (
+              <button
+                onClick={() => {
+                  setIsDecorationMode(true);
+                  trackEvent('open_draw_mode');
+                }}
+                className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200 transition-all z-20"
+                data-html2canvas-ignore
+              >
+                <Palette size={20} />
+              </button>
+            )}
 
-          {/* Grid Area */}
-          <div className="flex-1 w-full flex items-center justify-center relative">
-            <div className={cn("w-full transition-all", isDecorationMode && "pointer-events-none")}>
-              {/* Title Area - Moved inside to match grid width */}
-              <div className="w-full flex justify-between items-end mb-2">
-                <h2
-                  className="text-4xl md:text-4xl text-[#1A1C20] font-black"
-                  style={{ fontFamily: 'var(--font-rem)' }}
-                >
-                  {period === 'Yearly' ? '2026' : '01'}
-                </h2>
-                <span
-                  className="text-sm md:text-base text-[#1A1C20] font-bold"
-                  style={{ fontFamily: 'var(--font-rem)' }}
-                >
-                  Bucket List
-                </span>
+            {/* Grid Area */}
+            <div className="flex-1 w-full flex items-center justify-center relative h-full flex-col px-6">
+              <div className={cn("w-full transition-all", isDecorationMode && "pointer-events-none")}>
+                {/* Title Area - Moved inside to match grid width */}
+                <div className="w-full flex justify-between items-end mb-2">
+                  <h2
+                    className="text-4xl md:text-4xl text-[#1A1C20] font-black"
+                    style={{ fontFamily: 'var(--font-rem)' }}
+                  >
+                    {period === 'Yearly' ? '2026' : '01'}
+                  </h2>
+                  <span
+                    className="text-sm md:text-base text-[#1A1C20] font-bold"
+                    style={{ fontFamily: 'var(--font-rem)' }}
+                  >
+                    Bucket List
+                  </span>
+                </div>
+
+                <BingoBoard
+                  data={bingoData}
+                  onChange={handleCellChange}
+                  gridSize={gridSize}
+                  className="w-full shadow-none bg-transparent border-none"
+                />
               </div>
 
-              <BingoBoard
-                data={bingoData}
-                onChange={handleCellChange}
-                gridSize={gridSize}
-                className="w-full shadow-none bg-transparent border-none"
-              />
+              {/* Footer Area */}
+              <div className="mt-2 mb-2 text-center w-full">
+                <p
+                  className="text-[#1A1C20] text-[12px] font-bold"
+                  style={{ fontFamily: 'var(--font-rem)' }}
+                >
+                  Bucket List BINGO
+                </p>
+                <p className="text-gray-400 text-[10px]">www.bucketlist.design</p>
+              </div>
             </div>
           </div>
 
-          {/* Footer Area */}
-          <div className="mt-2 mb-2 text-center">
-            <p
-              className="text-[#1A1C20] text-sm font-bold"
-              style={{ fontFamily: 'var(--font-rem)' }}
-            >
-              Bucket List BINGO
-            </p>
-            <p className="text-gray-400 text-xs mt-0.5">bucket-list-bingo.vercel.app</p>
-          </div>
-
-          {/* Decoration Overlay - Covers entire capture area */}
-          <div className={cn(
-            "absolute left-0 w-full h-full transition-all",
-            isDecorationMode
-              ? "top-0 pointer-events-auto z-10"
-              : "-top-5 pointer-events-none z-10"
-          )}>
+          {/* Decoration Overlay - Covers entire capture area (Unscaled) */}
+          <div
+            className={cn(
+              "absolute inset-0 w-full h-full z-10",
+              isDecorationMode ? "pointer-events-auto" : "pointer-events-none"
+            )}
+          >
             <DecorationOverlay
               ref={decorationRef}
               strokeColor={strokeColor}

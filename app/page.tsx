@@ -344,12 +344,12 @@ export default function Home() {
 
           {/* Bottom Toolbar */}
           <div className={cn(
-            "fixed bottom-0 left-0 w-full z-50 transition-opacity duration-200",
+            "fixed bottom-0 left-1/2 -translate-x-1/2 w-full z-50 transition-opacity duration-200",
             isDrawing ? "opacity-0 pointer-events-none" : "opacity-100"
           )}>
             <DrawingToolbar
-              color={strokeColor}
-              setColor={(color) => {
+              strokeColor={strokeColor}
+              setStrokeColor={(color) => {
                 setStrokeColor(color);
                 trackEvent('select_color', { color_hex: color });
               }}
@@ -359,7 +359,7 @@ export default function Home() {
                 trackEvent('change_thickness', { width });
               }}
               isEraser={isEraser}
-              setIsEraser={setIsEraser}
+              isHighlighter={isHighlighter}
             />
           </div>
         </>

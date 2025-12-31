@@ -8,19 +8,15 @@ import { trackEvent } from '@/lib/analytics';
 interface DrawingTopBarProps {
     onUndo: () => void;
     onDone: () => void;
-    isEraser: boolean;
-    setIsEraser: (isEraser: boolean) => void;
-    isHighlighter: boolean;
-    setIsHighlighter: (isHighlighter: boolean) => void;
+    activeTool: 'pen' | 'highlighter' | 'eraser';
+    onToolChange: (tool: 'pen' | 'highlighter' | 'eraser') => void;
 }
 
 export const DrawingTopBar = ({
     onUndo,
     onDone,
-    isEraser,
-    setIsEraser,
-    isHighlighter,
-    setIsHighlighter,
+    activeTool,
+    onToolChange,
 }: DrawingTopBarProps) => {
     return (
         <div className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-4 py-3 bg-white/95 backdrop-blur-sm border-b border-gray-100">
@@ -40,38 +36,36 @@ export const DrawingTopBar = ({
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-1 bg-gray-100/50 p-1 rounded-xl">
                 <button
                     onClick={() => {
-                        setIsEraser(false);
-                        setIsHighlighter(false);
+                        onToolChange('pen');
                         trackEvent('select_tool', { tool: 'pen' });
                     }}
                     className={cn(
                         "p-2 rounded-lg transition-all",
-                        !isEraser && !isHighlighter ? "bg-white text-black shadow-sm" : "text-gray-400 hover:text-gray-600"
+                        activeTool === 'pen' ? "bg-white text-black shadow-sm" : "text-gray-400 hover:text-gray-600"
                     )}
                 >
                     <Pen size={20} />
                 </button>
                 <button
                     onClick={() => {
-                        setIsEraser(false);
-                        setIsHighlighter(true);
+                        onToolChange('highlighter');
                         trackEvent('select_tool', { tool: 'highlighter' });
                     }}
                     className={cn(
                         "p-2 rounded-lg transition-all",
-                        !isEraser && isHighlighter ? "bg-white text-black shadow-sm" : "text-gray-400 hover:text-gray-600"
+                        activeTool === 'highlighter' ? "bg-white text-black shadow-sm" : "text-gray-400 hover:text-gray-600"
                     )}
                 >
                     <Highlighter size={20} />
                 </button>
                 <button
                     onClick={() => {
-                        setIsEraser(true);
+                        onToolChange('eraser');
                         trackEvent('select_tool', { tool: 'eraser' });
                     }}
                     className={cn(
                         "p-2 rounded-lg transition-all",
-                        isEraser ? "bg-white text-black shadow-sm" : "text-gray-400 hover:text-gray-600"
+                        activeTool === 'eraser' ? "bg-white text-black shadow-sm" : "text-gray-400 hover:text-gray-600"
                     )}
                 >
                     <Eraser size={20} />

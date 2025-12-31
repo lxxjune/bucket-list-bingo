@@ -23,6 +23,8 @@ export const BingoBoard = React.forwardRef<HTMLDivElement, BingoBoardProps>(
             5: 'grid-cols-5',
         };
 
+        const displayData = data.slice(0, gridSize * gridSize);
+
         return (
             <div
                 ref={ref}
@@ -32,7 +34,7 @@ export const BingoBoard = React.forwardRef<HTMLDivElement, BingoBoardProps>(
                 )}
             >
                 <div className={cn("grid w-full h-full gap-[1px] px-[1px] py-[1px] bg-gray-400", gridCols[gridSize])}>
-                    {data.map((text, index) => (
+                    {displayData.map((text, index) => (
                         <div
                             key={index}
                             className="aspect-square relative group flex items-center justify-center cursor-text bg-white hover:bg-gray-50 focus-within:bg-gray-50 transition-all overflow-hidden p-1"

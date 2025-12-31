@@ -27,23 +27,9 @@ export const ActionButtons = ({ targetRef, gridSize, isDecorated }: ActionButton
             // Detect mobile device
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-            // Calculate pixel ratio to ensure output width is 360px (or close to it)
-            // Current width is targetRef.current.offsetWidth
-            // Target width is 360
-            // We want (currentWidth * pixelRatio) = 360 * 2 (for retina quality) or just 360?
-            // Let's aim for high quality, so maybe 720px width (2x)?
-            // The user asked for "Fixed Resolution (360x640)".
-            // If we output 360x640, it might be blurry on high DPI screens.
-            // Usually "Fixed Resolution" in web design means CSS pixels.
-            // Let's export at 2x (720x1280) for better quality, or 1x if strictly requested.
-            // Let's stick to 2x (720px width) for quality, as 360px is very low for an image.
-            // Wait, if the user wants "alignment", 360px is the logical size.
-            // Let's try to match the visual expectation.
-            // If I export at 360px, text will be unreadable.
-            // Let's export at 720px (2x).
-            const targetWidth = 720;
-            const currentWidth = targetRef.current.offsetWidth;
-            const pixelRatio = targetWidth / currentWidth;
+            // Calculate dimensions
+            const width = targetRef.current.offsetWidth;
+            const height = targetRef.current.offsetHeight;
 
             // Retry logic
             let dataUrl = '';
@@ -53,11 +39,12 @@ export const ActionButtons = ({ targetRef, gridSize, isDecorated }: ActionButton
                         quality: 0.95,
                         cacheBust: true,
                         backgroundColor: '#ffffff',
-                        pixelRatio: pixelRatio,
+                        width: width,
+                        height: height,
+                        pixelRatio: 2, // 2x for better quality
                         style: {
-                            overflow: 'hidden',
-                            // We don't need to reset zoom or transform here because we are capturing the responsive container
-                            // which has no transform on itself.
+                            margin: '0',
+                            transform: 'none',
                         },
                         filter: (node) => !node.classList?.contains('exclude-from-capture'),
                     });

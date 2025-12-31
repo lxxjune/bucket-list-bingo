@@ -143,7 +143,7 @@ export default function Home() {
       <div
         ref={captureRef}
         className={cn(
-          "bg-white relative overflow-hidden flex flex-col items-center shadow-md rounded-3xl mx-auto transition-shadow duration-300",
+          "bg-white relative overflow-hidden flex flex-col items-center shadow-md rounded-xs mx-auto transition-shadow duration-300",
           "w-full max-w-[480px] aspect-[9/16]", // Responsive width with fixed aspect ratio
           isDecorationMode ? "shadow-2xl ring-2 ring-black/5" : "shadow-md"
         )}

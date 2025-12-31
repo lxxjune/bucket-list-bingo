@@ -19,6 +19,12 @@ const rem = REM({
 export const metadata: Metadata = {
   title: "2026 New Year Bucket List Bingo",
   description: "Make your 2026 bucket list with a bingo game!",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
 };
 
 export default function RootLayout({

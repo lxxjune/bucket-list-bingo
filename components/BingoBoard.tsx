@@ -43,20 +43,30 @@ export const BingoBoard = React.forwardRef<HTMLDivElement, BingoBoardProps>(
                         >
                             <textarea
                                 value={text}
-                                onChange={(e) => handleChange(index, e.target.value)}
+                                onChange={(e) => {
+                                    handleChange(index, e.target.value);
+                                    // Auto-resize height
+                                    e.target.style.height = 'auto';
+                                    e.target.style.height = `${e.target.scrollHeight}px`;
+                                }}
+                                onFocus={(e) => {
+                                    // Adjust height on focus
+                                    e.target.style.height = 'auto';
+                                    e.target.style.height = `${e.target.scrollHeight}px`;
+                                }}
                                 onBlur={(e) => {
                                     trackEvent('input_text', { char_length: e.target.value.length });
                                 }}
                                 rows={1}
                                 className={cn(
-                                    "w-full bg-transparent text-center font-medium resize-none outline-none text-gray-700 placeholder:text-gray-300 leading-tight max-h-full",
-                                    text.length > 10 ? "text-[10px] md:text-xs" :
-                                        text.length > 6 ? "text-xs md:text-sm" :
-                                            "text-sm md:text-base"
+                                    "w-full bg-transparent text-center font-medium resize-none outline-none text-gray-900 placeholder:text-gray-300 leading-tight overflow-hidden",
+                                    text.length > 20 ? "text-[9px] md:text-[10px]" :
+                                        text.length > 12 ? "text-[10px] md:text-xs" :
+                                            text.length > 6 ? "text-xs md:text-sm" :
+                                                "text-sm md:text-base"
                                 )}
                                 placeholder=""
-                                maxLength={15}
-                                style={{ fieldSizing: 'content' } as React.CSSProperties}
+                                maxLength={30}
                             />
                         </div>
                     ))}

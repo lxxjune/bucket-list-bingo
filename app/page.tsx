@@ -5,10 +5,22 @@ import { BingoBoard } from '@/components/BingoBoard';
 import { CategoryButtons } from '@/components/CategoryButtons';
 import { ActionButtons } from '@/components/ActionButtons';
 import { CategoryName } from '@/constants/bingoData';
+import { DecorationOverlay, DecorationOverlayRef } from '@/components/DecorationOverlay';
+import { DrawingToolbar } from '@/components/DrawingToolbar';
+import { Palette } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function Home() {
   const [bingoData, setBingoData] = useState<string[]>(Array(25).fill(''));
   const captureRef = useRef<HTMLDivElement>(null);
+
+  // Decoration Mode State
+  const [isDecorationMode, setIsDecorationMode] = useState(false);
+  const [strokeColor, setStrokeColor] = useState('#000000');
+  const [strokeWidth, setStrokeWidth] = useState(4);
+  const [isEraser, setIsEraser] = useState(false);
+  const [isHighlighter, setIsHighlighter] = useState(false);
+  const decorationRef = useRef<DecorationOverlayRef>(null);
 
   const handleCellChange = (index: number, value: string) => {
     const newData = [...bingoData];
@@ -17,7 +29,6 @@ export default function Home() {
   };
 
   const handleCategorySelect = (category: CategoryName, items: string[]) => {
-    // Overwrite the entire board with selected category items
     setBingoData(items);
   };
 
@@ -34,7 +45,25 @@ export default function Home() {
         </p>
       </header>
 
-      <CategoryButtons onCategorySelect={handleCategorySelect} />
+      {/* Mode Toggle Button */}
+      <div className="w-full flex justify-end mb-4 px-2">
+        <button
+          onClick={() => setIsDecorationMode(!isDecorationMode)}
+          className={cn(
+            "flex items-center gap-2 px-4 py-2 rounded-full font-bold shadow-sm transition-all",
+            isDecorationMode
+              ? "bg-indigo-600 text-white shadow-indigo-200"
+              : "bg-white text-indigo-600 border border-indigo-100 hover:bg-indigo-50"
+          )}
+        >
+          <Palette size={18} />
+          {isDecorationMode ? '꾸미기 완료' : '꾸미기 모드'}
+        </button>
+      </div>
+
+      {!isDecorationMode && (
+        <CategoryButtons onCategorySelect={handleCategorySelect} />
+      )}
 
       {/* Capture Area */}
       <div
@@ -50,12 +79,31 @@ export default function Home() {
           <div className="w-16 md:w-24 h-1 bg-indigo-400 mx-auto mt-2 rounded-full" />
         </div>
 
-        <div className="flex-1 flex items-center justify-center">
-          <BingoBoard
-            data={bingoData}
-            onChange={handleCellChange}
-            className="w-full shadow-none bg-transparent border-none"
-          />
+        <div className="flex-1 flex items-center justify-center relative">
+          <div className={cn("w-full transition-all", isDecorationMode && "pointer-events-none")}>
+            <BingoBoard
+              data={bingoData}
+              onChange={handleCellChange}
+              className="w-full shadow-none bg-transparent border-none"
+            />
+          </div>
+
+          {/* Decoration Overlay - Always rendered but hidden/inactive when not in mode? 
+              Actually, we want it always visible so drawings persist. 
+              But pointer-events should be toggled. 
+          */}
+          <div className={cn(
+            "absolute top-0 left-0 w-full h-full transition-all",
+            isDecorationMode ? "pointer-events-auto z-10" : "pointer-events-none z-10"
+          )}>
+            <DecorationOverlay
+              ref={decorationRef}
+              strokeColor={strokeColor}
+              strokeWidth={strokeWidth}
+              isEraser={isEraser}
+              isHighlighter={isHighlighter}
+            />
+          </div>
         </div>
 
         <div className="mt-6 mb-4 text-center">
@@ -64,9 +112,23 @@ export default function Home() {
         </div>
       </div>
 
-      <ActionButtons targetRef={captureRef} />
+      {isDecorationMode ? (
+        <DrawingToolbar
+          strokeColor={strokeColor}
+          setStrokeColor={setStrokeColor}
+          strokeWidth={strokeWidth}
+          setStrokeWidth={setStrokeWidth}
+          isEraser={isEraser}
+          setIsEraser={setIsEraser}
+          isHighlighter={isHighlighter}
+          setIsHighlighter={setIsHighlighter}
+          onClear={() => decorationRef.current?.clearCanvas()}
+        />
+      ) : (
+        <ActionButtons targetRef={captureRef} />
+      )}
 
-      <footer className="text-center text-gray-400 text-xs pb-8">
+      <footer className="text-center text-gray-400 text-xs pb-8 mt-8">
         © 2025 Bucket List Bingo. All rights reserved.
       </footer>
     </main>

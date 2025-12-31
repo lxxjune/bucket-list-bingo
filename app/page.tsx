@@ -38,23 +38,22 @@ export default function Home() {
     const handleEnd = () => setIsDrawing(false);
 
     // Use capture: true to intercept events before react-sketch-canvas consumes them
+    // Start events on the element
     element.addEventListener('pointerdown', handleStart, { capture: true });
-    element.addEventListener('pointerup', handleEnd, { capture: true });
-    element.addEventListener('pointerleave', handleEnd, { capture: true });
-
-    // Add explicit touch events for broader mobile support (iOS)
     element.addEventListener('touchstart', handleStart, { capture: true });
-    element.addEventListener('touchend', handleEnd, { capture: true });
-    element.addEventListener('touchcancel', handleEnd, { capture: true });
+
+    // End events on the window to ensure we catch them anywhere
+    window.addEventListener('pointerup', handleEnd, { capture: true });
+    window.addEventListener('touchend', handleEnd, { capture: true });
+    window.addEventListener('touchcancel', handleEnd, { capture: true });
 
     return () => {
       element.removeEventListener('pointerdown', handleStart, { capture: true });
-      element.removeEventListener('pointerup', handleEnd, { capture: true });
-      element.removeEventListener('pointerleave', handleEnd, { capture: true });
-
       element.removeEventListener('touchstart', handleStart, { capture: true });
-      element.removeEventListener('touchend', handleEnd, { capture: true });
-      element.removeEventListener('touchcancel', handleEnd, { capture: true });
+
+      window.removeEventListener('pointerup', handleEnd, { capture: true });
+      window.removeEventListener('touchend', handleEnd, { capture: true });
+      window.removeEventListener('touchcancel', handleEnd, { capture: true });
     };
   }, [isDecorationMode]);
 

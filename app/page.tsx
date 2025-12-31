@@ -8,6 +8,7 @@ import { DrawingToolbar } from '@/components/DrawingToolbar';
 import { DrawingTopBar } from '@/components/DrawingTopBar';
 import { Palette } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { trackEvent } from '@/lib/analytics';
 
 type Period = 'Yearly' | 'Monthly';
 type GridSize = 3 | 4 | 5;
@@ -25,6 +26,9 @@ export default function Home() {
   const [isEraser, setIsEraser] = useState(false);
   const [isHighlighter, setIsHighlighter] = useState(false);
   const decorationRef = useRef<DecorationOverlayRef>(null);
+
+  // Tracking State
+  const [hasDrawn, setHasDrawn] = useState(false);
 
   // Handle Grid Size Change
   useEffect(() => {
@@ -79,7 +83,10 @@ export default function Home() {
           {(['Yearly', 'Monthly'] as Period[]).map((p) => (
             <button
               key={p}
-              onClick={() => setPeriod(p)}
+              onClick={() => {
+                setPeriod(p);
+                trackEvent('select_period', { period_type: p.toLowerCase() });
+              }}
               className={cn(
                 "flex-1 py-2 rounded-full text-sm font-bold transition-all",
                 period === p
@@ -97,7 +104,10 @@ export default function Home() {
           {([3, 4, 5] as GridSize[]).map((size) => (
             <button
               key={size}
-              onClick={() => setGridSize(size)}
+              onClick={() => {
+                setGridSize(size);
+                trackEvent('select_grid', { size: `${size}x${size}` });
+              }}
               className={cn(
                 "flex-1 py-2 rounded-full text-sm font-bold transition-all",
                 gridSize === size
@@ -134,7 +144,10 @@ export default function Home() {
           {/* Absolute Draw Button (Visible only in normal mode) */}
           {!isDecorationMode && (
             <button
-              onClick={() => setIsDecorationMode(true)}
+              onClick={() => {
+                setIsDecorationMode(true);
+                trackEvent('open_draw_mode');
+              }}
               className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200 transition-all z-20"
               data-html2canvas-ignore
             >
@@ -194,6 +207,12 @@ export default function Home() {
               strokeWidth={strokeWidth}
               isEraser={isEraser}
               isHighlighter={isHighlighter}
+              onStroke={() => {
+                if (!hasDrawn) {
+                  setHasDrawn(true);
+                  trackEvent('use_draw_tool');
+                }
+              }}
             />
           </div>
         </div>
@@ -219,11 +238,11 @@ export default function Home() {
           />
         </>
       ) : (
-        <ActionButtons targetRef={captureRef} />
+        <ActionButtons targetRef={captureRef} gridSize={gridSize} isDecorated={hasDrawn} />
       )}
 
       <footer className="text-center text-gray-400 text-xs pb-8 mt-8">
-        © 2025 Bucket List Bingo. All rights reserved.
+        © 2026 Bucket List Bingo. All rights reserved.
       </footer>
     </main>
   );

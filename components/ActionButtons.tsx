@@ -4,13 +4,15 @@ import React, { useState } from 'react';
 import { Download, Share2, Check } from 'lucide-react';
 import { toJpeg } from 'html-to-image';
 import { saveAs } from 'file-saver';
-import { event } from '@/lib/analytics';
+import { trackEvent } from '@/lib/analytics';
 
 interface ActionButtonsProps {
     targetRef: React.RefObject<HTMLDivElement | null>;
+    gridSize: number;
+    isDecorated: boolean;
 }
 
-export const ActionButtons = ({ targetRef }: ActionButtonsProps) => {
+export const ActionButtons = ({ targetRef, gridSize, isDecorated }: ActionButtonsProps) => {
     const [isCopied, setIsCopied] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
@@ -56,10 +58,9 @@ export const ActionButtons = ({ targetRef }: ActionButtonsProps) => {
             // Direct Download (Pinterest style) - Save to Gallery/Downloads
             saveAs(blob, '2026_bucket_list_bingo.jpg');
 
-            event({
-                action: 'image_download',
-                category: 'interaction',
-                label: 'save_image',
+            trackEvent('click_download', {
+                final_grid_size: `${gridSize}x${gridSize}`,
+                is_decorated: isDecorated,
             });
         } catch (err) {
             console.error('Failed to save image:', err);
@@ -79,22 +80,17 @@ export const ActionButtons = ({ targetRef }: ActionButtonsProps) => {
                     text: '나만의 2026년 버킷리스트를 빙고로 만들어보세요!',
                     url: url,
                 });
+                trackEvent('click_share');
             } else {
                 await navigator.clipboard.writeText(url);
                 setIsCopied(true);
+                trackEvent('copy_link');
                 setTimeout(() => setIsCopied(false), 2000);
             }
-
-            event({
-                action: 'link_share',
-                category: 'interaction',
-                label: 'share_url',
-            });
         } catch (err) {
             console.error('Failed to share:', err);
         }
     };
-
 
     return (
         <div className="w-full flex gap-3 justify-center mt-8 mb-12 px-6">

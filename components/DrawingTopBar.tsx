@@ -3,6 +3,7 @@
 import React from 'react';
 import { Undo2, Pen, Highlighter, Eraser } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { trackEvent } from '@/lib/analytics';
 
 interface DrawingTopBarProps {
     onUndo: () => void;
@@ -25,7 +26,10 @@ export const DrawingTopBar = ({
         <div className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-4 py-3 bg-white/95 backdrop-blur-sm border-b border-gray-100">
             {/* Left: Undo */}
             <button
-                onClick={onUndo}
+                onClick={() => {
+                    onUndo();
+                    trackEvent('click_undo');
+                }}
                 className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-all font-medium text-sm flex items-center gap-1"
             >
                 <Undo2 size={20} />
@@ -38,6 +42,7 @@ export const DrawingTopBar = ({
                     onClick={() => {
                         setIsEraser(false);
                         setIsHighlighter(false);
+                        trackEvent('select_tool', { tool: 'pen' });
                     }}
                     className={cn(
                         "p-2 rounded-lg transition-all",
@@ -50,6 +55,7 @@ export const DrawingTopBar = ({
                     onClick={() => {
                         setIsEraser(false);
                         setIsHighlighter(true);
+                        trackEvent('select_tool', { tool: 'highlighter' });
                     }}
                     className={cn(
                         "p-2 rounded-lg transition-all",
@@ -59,7 +65,10 @@ export const DrawingTopBar = ({
                     <Highlighter size={20} />
                 </button>
                 <button
-                    onClick={() => setIsEraser(true)}
+                    onClick={() => {
+                        setIsEraser(true);
+                        trackEvent('select_tool', { tool: 'eraser' });
+                    }}
                     className={cn(
                         "p-2 rounded-lg transition-all",
                         isEraser ? "bg-white text-black shadow-sm" : "text-gray-400 hover:text-gray-600"
@@ -71,7 +80,10 @@ export const DrawingTopBar = ({
 
             {/* Right: Done */}
             <button
-                onClick={onDone}
+                onClick={() => {
+                    onDone();
+                    trackEvent('click_done');
+                }}
                 className="px-4 py-1.5 bg-black text-white text-sm font-bold rounded-full hover:bg-gray-800 transition-all"
             >
                 Done

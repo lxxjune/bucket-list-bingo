@@ -3,6 +3,7 @@
 import React from 'react';
 import { Eraser, Trash2, Pen, Highlighter } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { trackEvent } from '@/lib/analytics';
 
 interface DrawingToolbarProps {
     strokeColor: string;
@@ -43,7 +44,10 @@ export const DrawingToolbar = ({
                         {COLORS.map((color) => (
                             <button
                                 key={color.name}
-                                onClick={() => setStrokeColor(color.value)}
+                                onClick={() => {
+                                    setStrokeColor(color.value);
+                                    trackEvent('select_color', { color: color.name });
+                                }}
                                 className={cn(
                                     "w-8 h-8 rounded-full transition-all flex-shrink-0 relative",
                                     strokeColor === color.value ? "scale-125 ring-2 ring-offset-2 ring-gray-200" : "hover:scale-110"
@@ -68,6 +72,8 @@ export const DrawingToolbar = ({
                         max={isHighlighter ? "40" : "20"}
                         value={strokeWidth}
                         onChange={(e) => setStrokeWidth(Number(e.target.value))}
+                        onMouseUp={() => trackEvent('change_thickness', { width: strokeWidth })}
+                        onTouchEnd={() => trackEvent('change_thickness', { width: strokeWidth })}
                         className="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                     />
                     <span className="text-xs text-gray-500 w-6 text-center">{strokeWidth}</span>

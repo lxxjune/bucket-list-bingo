@@ -1,4 +1,4 @@
-export const GA_TRACKING_ID = 'G-KWENENKNYB';
+export const GA_TRACKING_ID = 'G-B5QLLD5914';
 
 export const pageview = (url: string) => {
   if (typeof window !== 'undefined' && (window as any).gtag) {
@@ -8,19 +8,8 @@ export const pageview = (url: string) => {
   }
 };
 
-type GTagEvent = {
-  action: string;
-  category: string;
-  label: string;
-  value?: number;
-};
-
-export const event = ({ action, category, label, value }: GTagEvent) => {
+export const trackEvent = (action: string, params?: Record<string, any>) => {
   if (typeof window !== 'undefined' && (window as any).gtag) {
-    (window as any).gtag('event', action, {
-      event_category: category,
-      event_label: label,
-      value: value,
-    });
+    (window as any).gtag('event', action, params);
   }
 };

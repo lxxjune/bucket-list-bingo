@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { event } from '@/lib/analytics';
+import { trackEvent } from '@/lib/analytics';
 
 interface BingoBoardProps {
     data: string[];
@@ -15,13 +15,6 @@ export const BingoBoard = React.forwardRef<HTMLDivElement, BingoBoardProps>(
     ({ data, onChange, className, gridSize }, ref) => {
         const handleChange = (index: number, value: string) => {
             onChange(index, value);
-            if (value.length === 1) {
-                event({
-                    action: 'bingo_cell_input',
-                    category: 'interaction',
-                    label: `cell_${index}`,
-                });
-            }
         };
 
         const gridCols = {
@@ -51,6 +44,9 @@ export const BingoBoard = React.forwardRef<HTMLDivElement, BingoBoardProps>(
                             <textarea
                                 value={text}
                                 onChange={(e) => handleChange(index, e.target.value)}
+                                onBlur={(e) => {
+                                    trackEvent('input_text', { char_length: e.target.value.length });
+                                }}
                                 rows={1}
                                 className={cn(
                                     "w-full bg-transparent text-center font-medium resize-none outline-none text-gray-700 placeholder:text-gray-300 leading-tight max-h-full",

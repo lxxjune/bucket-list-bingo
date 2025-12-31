@@ -75,26 +75,6 @@ export const ActionButtons = ({ targetRef, gridSize, isDecorated }: ActionButton
             const blob = await res.blob();
             const file = new File([blob], '2026_bucket_list_bingo.jpg', { type: 'image/jpeg' });
 
-            // Try native sharing first (for mobile "Save to Gallery" experience)
-            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-                try {
-                    await navigator.share({
-                        files: [file],
-                        title: '2026 버킷리스트 빙고',
-                        text: '나만의 2026년 버킷리스트를 빙고로 만들어보세요!',
-                    });
-                    trackEvent('click_download', {
-                        final_grid_size: `${gridSize}x${gridSize}`,
-                        is_decorated: isDecorated,
-                        method: 'native_share'
-                    });
-                    return; // Exit if shared successfully
-                } catch (shareError) {
-                    console.warn('Native share failed, falling back to download:', shareError);
-                    // Continue to fallback
-                }
-            }
-
             // Fallback: Direct Download (file-saver)
             saveAs(blob, '2026_bucket_list_bingo.jpg');
 

@@ -235,7 +235,7 @@ export default function Home() {
                   setIsDecorationMode(true);
                   trackEvent('open_draw_mode');
                 }}
-                className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200 transition-all z-20"
+                className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200 transition-all z-20 exclude-from-capture"
                 data-html2canvas-ignore
               >
                 <Palette size={20} />

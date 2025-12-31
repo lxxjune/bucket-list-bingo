@@ -168,7 +168,7 @@ export default function Home() {
           <div className="flex-1 w-full flex items-center justify-center relative flex-col">
             <div className={cn("w-full transition-all", isDecorationMode && "pointer-events-none")}>
               {/* Title Area */}
-              <div className="w-full flex justify-between items-end mb-4">
+              <div className="w-full flex justify-between items-end mb-2">
                 <h2
                   className="text-4xl md:text-5xl text-[#1A1C20] font-black"
                   style={{ fontFamily: 'var(--font-rem)' }}

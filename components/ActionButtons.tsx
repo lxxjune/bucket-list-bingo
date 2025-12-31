@@ -62,6 +62,26 @@ export const ActionButtons = ({ targetRef, gridSize, isDecorated }: ActionButton
             const blob = await res.blob();
             const file = new File([blob], '2026_bucket_list_bingo.jpg', { type: 'image/jpeg' });
 
+            // Try Web Share API first (for mobile "Save to Gallery" experience)
+            if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        files: [file],
+                        title: '2026 Bucket List Bingo',
+                    });
+                    trackEvent('click_download', {
+                        final_grid_size: `${gridSize}x${gridSize}`,
+                        is_decorated: isDecorated,
+                        method: 'share_sheet'
+                    });
+                    return; // Stop here if shared successfully
+                } catch (err) {
+                    // If user cancelled, do nothing. If error, fall back to download.
+                    if ((err as Error).name === 'AbortError') return;
+                    console.warn('Share failed, falling back to download', err);
+                }
+            }
+
             // Fallback: Direct Download (file-saver)
             saveAs(blob, '2026_bucket_list_bingo.jpg');
 

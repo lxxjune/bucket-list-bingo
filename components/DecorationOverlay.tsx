@@ -74,7 +74,7 @@ export const DecorationOverlay = forwardRef<DecorationOverlayRef, DecorationOver
         };
 
         return (
-            <div className="absolute top-0 left-0 w-full h-full z-20 touch-none pointer-events-auto">
+            <div className="absolute top-0 left-0 w-full h-full z-20 touch-none">
                 <ReactSketchCanvas
                     ref={canvasRef}
                     strokeWidth={strokeWidth}

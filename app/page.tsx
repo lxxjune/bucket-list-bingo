@@ -29,6 +29,10 @@ export default function Home() {
   const decorationRef = useRef<DecorationOverlayRef>(null);
   const drawAreaRef = useRef<HTMLDivElement>(null);
 
+  // Tracking Refs
+  const drawStartTimeRef = useRef<number>(0);
+  const strokeCountRef = useRef<number>(0);
+
   // Native Event Listener for Drawing State (Fix for Mobile/Safari)
   useEffect(() => {
     const element = drawAreaRef.current;
@@ -149,6 +153,18 @@ export default function Home() {
             <button
               key={size}
               onClick={() => {
+                // Track grid reset if data exists
+                if (gridSize !== size) {
+                  const filledCount = bingoData.filter(c => c.trim().length > 0).length;
+                  if (filledCount > 0) {
+                    trackEvent('reset_grid', {
+                      lost_content_count: filledCount,
+                      from_size: `${gridSize}x${gridSize}`,
+                      to_size: `${size}x${size}`
+                    });
+                  }
+                }
+
                 setGridSize(size);
                 trackEvent('select_grid', { size: `${size}x${size}` });
               }}
@@ -179,7 +195,9 @@ export default function Home() {
           <button
             onClick={() => {
               setIsDecorationMode(true);
-              trackEvent('open_draw_mode');
+              drawStartTimeRef.current = Date.now();
+              strokeCountRef.current = 0;
+              trackEvent('view_draw_mode');
             }}
             className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200 transition-all z-20 exclude-from-capture"
             data-html2canvas-ignore
@@ -188,7 +206,7 @@ export default function Home() {
           </button>
         )}
 
-        {/* Content Container */}
+        {/* ... (Content Container code unchanged) ... */}
         <div className="w-full h-full flex flex-col p-6 md:p-8">
           {/* Grid Area */}
           <div className="flex-1 w-full flex items-center justify-center relative flex-col">
@@ -247,8 +265,12 @@ export default function Home() {
             onStroke={() => {
               if (!hasDrawn) {
                 setHasDrawn(true);
-                trackEvent('use_draw_tool');
               }
+              strokeCountRef.current += 1;
+              trackEvent('interact_draw_tool', {
+                action: 'draw',
+                tool_type: isEraser ? 'eraser' : isHighlighter ? 'highlighter' : 'pen'
+              });
             }}
           />
         </div>
@@ -264,12 +286,17 @@ export default function Home() {
             <DrawingTopBar
               onUndo={() => {
                 decorationRef.current?.undo();
-                trackEvent('click_undo');
+                trackEvent('interact_draw_tool', { action: 'undo', tool_type: 'unknown' });
               }}
               onDone={() => {
                 setIsDecorationMode(false);
                 setHasDrawn(false);
-                trackEvent('click_done_drawing');
+
+                const duration = (Date.now() - drawStartTimeRef.current) / 1000;
+                trackEvent('complete_drawing', {
+                  stroke_count: strokeCountRef.current,
+                  duration_seconds: Math.round(duration)
+                });
               }}
               activeTool={isEraser ? 'eraser' : isHighlighter ? 'highlighter' : 'pen'}
               onToolChange={(tool) => {

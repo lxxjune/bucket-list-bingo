@@ -25,6 +25,9 @@ export const BingoBoard = React.forwardRef<HTMLDivElement, BingoBoardProps>(
 
         const displayData = data.slice(0, gridSize * gridSize);
 
+        const focusStartTimeRef = React.useRef<number>(0);
+        const focusValueRef = React.useRef<string>('');
+
         return (
             <div
                 ref={ref}
@@ -52,16 +55,38 @@ export const BingoBoard = React.forwardRef<HTMLDivElement, BingoBoardProps>(
                                     e.target.style.height = `${e.target.scrollHeight}px`;
                                 }}
                                 onFocus={(e) => {
+                                    focusStartTimeRef.current = Date.now();
+                                    focusValueRef.current = e.target.value;
                                     // Adjust height on focus
                                     e.target.style.height = 'auto';
                                     e.target.style.height = `${e.target.scrollHeight}px`;
                                 }}
                                 onBlur={(e) => {
+                                    const duration = (Date.now() - focusStartTimeRef.current) / 1000;
+                                    const currentValue = e.target.value;
+                                    const prevValue = focusValueRef.current;
+
+                                    // 1. Writer's Block: Focus for > 3s with no input
+                                    if (duration > 3 && currentValue === prevValue && currentValue.trim().length === 0) {
+                                        trackEvent('focus_cell_no_input', {
+                                            duration_seconds: Math.round(duration)
+                                        });
+                                    }
+
+                                    // 2. Writer's Block: Deleting content
+                                    if (currentValue.length < prevValue.length) {
+                                        trackEvent('delete_cell_content', {
+                                            prev_length: prevValue.length,
+                                            deleted_chars: prevValue.length - currentValue.length
+                                        });
+                                    }
+
                                     const filledCount = data.filter(item => item.trim().length > 0).length;
                                     trackEvent('edit_cell', {
                                         filled_count: filledCount,
                                         grid_size: gridSize,
-                                        content_length: e.target.value.length
+                                        content_length: currentValue.length,
+                                        duration_seconds: Math.round(duration)
                                     });
                                 }}
                                 rows={1}

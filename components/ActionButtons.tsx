@@ -92,6 +92,9 @@ export const ActionButtons = ({ targetRef, gridSize, isDecorated }: ActionButton
             });
         } catch (err) {
             console.error('Failed to save image:', err);
+            trackEvent('error_save_image', {
+                error_message: err instanceof Error ? err.message : String(err)
+            });
             alert('이미지 저장에 실패했습니다. 다시 시도해주세요.');
         } finally {
             setIsSaving(false);

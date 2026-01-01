@@ -57,7 +57,12 @@ export const BingoBoard = React.forwardRef<HTMLDivElement, BingoBoardProps>(
                                     e.target.style.height = `${e.target.scrollHeight}px`;
                                 }}
                                 onBlur={(e) => {
-                                    trackEvent('input_text', { char_length: e.target.value.length });
+                                    const filledCount = data.filter(item => item.trim().length > 0).length;
+                                    trackEvent('edit_cell', {
+                                        filled_count: filledCount,
+                                        grid_size: gridSize,
+                                        content_length: e.target.value.length
+                                    });
                                 }}
                                 rows={1}
                                 className={cn(

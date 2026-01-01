@@ -79,6 +79,32 @@ export default function Home() {
     setBingoData(newData);
   };
 
+  // Analytics: Track session summary on unload
+  const bingoDataRef = useRef(bingoData);
+  const gridSizeRef = useRef(gridSize);
+
+  useEffect(() => {
+    bingoDataRef.current = bingoData;
+    gridSizeRef.current = gridSize;
+  }, [bingoData, gridSize]);
+
+  useEffect(() => {
+    const handleUnload = () => {
+      const filledCount = bingoDataRef.current.filter(c => c.trim().length > 0).length;
+      if (filledCount > 0) {
+        trackEvent('session_summary', {
+          filled_count: filledCount,
+          grid_size: gridSizeRef.current
+        });
+      }
+    };
+
+    window.addEventListener('beforeunload', handleUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleUnload);
+    };
+  }, []);
+
   return (
     <main className="min-h-screen py-12 px-4 flex flex-col items-center md:max-w-2xl lg:max-w-3xl mx-auto transition-all duration-300 font-sans">
 

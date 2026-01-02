@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     default: 'Bucket List Bingo - 버킷리스트 빙고 만들기',
   },
   description: "나만의 버킷리스트를 빙고 게임으로 만들어보세요. 친구들과 공유해 빙고게임을 즐겨보세요.",
-  keywords: ['버킷리스트', '빙고', '버킷리스트 빙고', '버킷리스트빙고', 'Bucket List', 'BucketListBingo', '새해 목표', '동기부여', 'Bucket List Bingo'],
+  keywords: ['버킷리스트', '빙고', '버킷리스트 빙고', '버킷리스트빙고', 'Bucket List', 'BucketListBingo', '새해 목표', '동기부여', '버킷리스트 양식', '버킷리스트 빙고 만들기', '버킷리스트 빙고 게임', 'Bucket List Bingo'],
   openGraph: {
     title: 'Bucket List Bingo - 버킷리스트 빙고 만들기',
     description: "나만의 버킷리스트를 빙고 게임으로 만들어보세요. 친구들과 공유해 빙고게임을 즐겨보세요.",

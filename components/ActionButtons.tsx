@@ -107,8 +107,8 @@ export const ActionButtons = ({ targetRef, gridSize, isDecorated }: ActionButton
         try {
             if (navigator.share) {
                 await navigator.share({
-                    title: '2026 버킷리스트 빙고',
-                    text: '나만의 2026년 버킷리스트를 빙고로 만들어보세요!',
+                    title: '버킷리스트 빙고',
+                    text: '나만의 버킷리스트를 빙고로 만들어보세요!',
                     url: url,
                 });
                 trackEvent('click_share');

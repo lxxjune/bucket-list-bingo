@@ -20,16 +20,24 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://www.bucketlist.design'),
   title: {
     template: '%s | 버킷리스트 빙고',
-    default: '버킷리스트 빙고 - 2026 새해 목표 달성',
+    default: '버킷리스트 빙고 - 2026 목표 달성',
   },
-  description: "2026년 새해 목표를 빙고 게임으로 만들어보세요. 나만의 버킷리스트를 작성하고 친구와 공유하여 동기부여를 얻을 수 있습니다. 목표 달성 필수 앱.",
+  description: "2026년 목표를 빙고로 만들어보세요. 나만의 버킷리스트를 작성하고 친구와 공유하여 동기부여를 얻을 수 있습니다. 목표 달성 필수 앱.",
   keywords: ['버킷리스트', '빙고', '버킷리스트 빙고', 'Bucket List', '새해 목표', '동기부여', 'Bucket List Bingo'],
   openGraph: {
-    title: '버킷리스트 빙고 - 2026 새해 목표 달성',
-    description: "2026년 새해 목표를 빙고 게임으로 만들어보세요. 나만의 버킷리스트를 작성하고 친구와 공유하여 동기부여를 얻을 수 있습니다. 목표 달성 필수 앱.",
+    title: '버킷리스트 빙고 - 2026 목표 달성',
+    description: "2026년 목표를 빙고로 만들어보세요. 나만의 버킷리스트를 작성하고 친구와 공유하여 동기부여를 얻을 수 있습니다. 목표 달성 필수 앱.",
     locale: 'ko_KR',
     type: 'website',
     siteName: 'Bucket List Bingo',
+    images: [
+      {
+        url: 'https://www.bucketlist.design/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: '버킷리스트 빙고',
+      },
+    ],
   },
   alternates: {
     canonical: '/',

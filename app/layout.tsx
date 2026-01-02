@@ -25,6 +25,12 @@ export const metadata: Metadata = {
     maximumScale: 1,
     userScalable: false,
   },
+  verification: {
+    google: "X6WxuSMurTga3iLgj1skDYcxOJpXRuMe_6aYEnjeEJI",
+    other: {
+      "naver-site-verification": "0e9b56689238a8589a6524533ccace085720959e",
+    },
+  },
 };
 
 export default function RootLayout({

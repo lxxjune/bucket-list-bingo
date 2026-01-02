@@ -19,23 +19,23 @@ const rem = REM({
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.bucketlist.design'),
   title: {
-    template: '%s | Bucket List Bingo',
-    default: 'Bucket List Bingo',
+    template: '%s | Bucket List Bingo - 버킷리스트 빙고 만들기',
+    default: 'Bucket List Bingo - 버킷리스트 빙고 만들기',
   },
   description: "나만의 버킷리스트를 빙고 게임으로 만들어보세요. 친구들과 공유해 빙고게임을 즐겨보세요.",
   keywords: ['버킷리스트', '빙고', '버킷리스트 빙고', 'Bucket List', '새해 목표', '동기부여', 'Bucket List Bingo'],
   openGraph: {
-    title: 'Bucket List Bingo',
+    title: 'Bucket List Bingo - 버킷리스트 빙고 만들기',
     description: "나만의 버킷리스트를 빙고 게임으로 만들어보세요. 친구들과 공유해 빙고게임을 즐겨보세요.",
     locale: 'ko_KR',
     type: 'website',
-    siteName: 'Bucket List Bingo',
+    siteName: 'Bucket List Bingo-버킷리스트 빙고 만들기',
     images: [
       {
         url: 'https://www.bucketlist.design/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Bucket List Bingo',
+        alt: 'Bucket List Bingo-버킷리스트 빙고 만들기',
       },
     ],
   },

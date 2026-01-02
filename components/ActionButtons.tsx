@@ -24,8 +24,8 @@ export const ActionButtons = ({ targetRef, gridSize, isDecorated }: ActionButton
             // Wait for a moment to ensure any pending renders are done
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            // Detect mobile device
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            // Detect iOS device specifically (iPhone/iPad)
+            const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
             // Calculate dimensions
             const width = targetRef.current.offsetWidth;
@@ -62,8 +62,9 @@ export const ActionButtons = ({ targetRef, gridSize, isDecorated }: ActionButton
             const blob = await res.blob();
             const file = new File([blob], '2026_bucket_list_bingo.jpg', { type: 'image/jpeg' });
 
-            // Try Web Share API first (for mobile "Save to Gallery" experience)
-            if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
+            // Try Web Share API ONLY for iOS (because iOS handles file saving via share sheet best)
+            // Android users prefer direct download (saveAs)
+            if (isIOS && navigator.canShare && navigator.canShare({ files: [file] })) {
                 try {
                     await navigator.share({
                         files: [file],
@@ -72,7 +73,7 @@ export const ActionButtons = ({ targetRef, gridSize, isDecorated }: ActionButton
                     trackEvent('click_download', {
                         final_grid_size: `${gridSize}x${gridSize}`,
                         is_decorated: isDecorated,
-                        method: 'share_sheet'
+                        method: 'share_sheet_ios'
                     });
                     return; // Stop here if shared successfully
                 } catch (err) {

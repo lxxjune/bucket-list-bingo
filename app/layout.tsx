@@ -17,8 +17,23 @@ const rem = REM({
 });
 
 export const metadata: Metadata = {
-  title: "2026 New Year Bucket List Bingo",
-  description: "Make your 2026 bucket list with a bingo game!",
+  metadataBase: new URL('https://www.bucketlist.design'),
+  title: {
+    template: '%s | 버킷리스트 빙고',
+    default: '버킷리스트 빙고 - 2026 새해 목표 달성',
+  },
+  description: "2026년 새해 목표를 빙고 게임으로 만들어보세요. 나만의 버킷리스트를 작성하고 친구와 공유하여 동기부여를 얻을 수 있습니다. 목표 달성 필수 앱.",
+  keywords: ['버킷리스트', '빙고', '버킷리스트 빙고', 'Bucket List', '새해 목표', '동기부여', 'Bucket List Bingo'],
+  openGraph: {
+    title: '버킷리스트 빙고 - 2026 새해 목표 달성',
+    description: "2026년 새해 목표를 빙고 게임으로 만들어보세요. 나만의 버킷리스트를 작성하고 친구와 공유하여 동기부여를 얻을 수 있습니다. 목표 달성 필수 앱.",
+    locale: 'ko_KR',
+    type: 'website',
+    siteName: 'Bucket List Bingo',
+  },
+  alternates: {
+    canonical: '/',
+  },
   viewport: {
     width: "device-width",
     initialScale: 1,
@@ -33,6 +48,14 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: '버킷리스트 빙고',
+  applicationCategory: 'LifestyleApplication',
+  operatingSystem: 'All',
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -41,6 +64,11 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={`${notoSansKr.variable} ${rem.variable} antialiased font-sans`}>
+        <Script
+          id="json-ld"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <GoogleAnalytics />
         {children}
       </body>

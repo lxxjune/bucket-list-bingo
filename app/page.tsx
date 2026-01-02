@@ -111,6 +111,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen py-12 px-4 flex flex-col items-center md:max-w-2xl lg:max-w-3xl mx-auto transition-all duration-300 font-sans">
+      <h1 className="sr-only">나만의 2026 버킷리스트 빙고 만들기</h1>
 
       <header className="text-center mb-8">
         <h1

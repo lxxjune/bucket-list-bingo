@@ -46,6 +46,9 @@ export const metadata: Metadata = {
       "naver-site-verification": "0e9b56689238a8589a6524533ccace085720959e",
     },
   },
+  icons: {
+    icon: '/favicon.png',
+  },
 };
 
 const jsonLd = {

@@ -6,11 +6,19 @@ import { cn } from '@/lib/utils';
 import { useSearchParams } from 'next/navigation';
 import { ActionButton } from '@/components/ActionButton';
 import { useLogEvent } from '@/hooks/useLogEvent';
+import { useGlobalLoading } from '@/context/GlobalLoadingContext';
+import { useEffect } from 'react';
 
 function LoginFormContent() {
     const { logEvent } = useLogEvent();
     const searchParams = useSearchParams();
     const errorMessage = searchParams.get('message');
+    const { setIsLoading } = useGlobalLoading();
+
+    // Turn off loading when error message appears (meaning server action returned)
+    useEffect(() => {
+        setIsLoading(false);
+    }, [errorMessage, setIsLoading]);
 
     return (
         <div className="min-h-screen flex flex-col items-center pt-[120px] px-[20px] bg-white">
@@ -66,7 +74,10 @@ function LoginFormContent() {
                             formAction={loginOrSignup}
                             variant="fill"
                             size="md"
-                            onClick={() => logEvent('CLICK_LOGIN_SUBMIT')}
+                            onClick={() => {
+                                setIsLoading(true);
+                                logEvent('CLICK_LOGIN_SUBMIT');
+                            }}
                         >
                             로그인 / 회원가입
                         </ActionButton>

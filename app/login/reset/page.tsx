@@ -4,8 +4,9 @@ import { resetPassword } from './actions';
 import { useSearchParams } from 'next/navigation';
 import { ActionButton } from '@/components/ActionButton';
 import { useLogEvent } from '@/hooks/useLogEvent';
+import { Suspense } from 'react';
 
-export default function ResetPasswordPage() {
+function ResetPasswordFormContent() {
     const { logEvent } = useLogEvent();
     const searchParams = useSearchParams();
     const message = searchParams.get('message');
@@ -69,5 +70,13 @@ export default function ResetPasswordPage() {
                 </form>
             </div>
         </div>
+    );
+}
+
+export default function ResetPasswordPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-white" />}>
+            <ResetPasswordFormContent />
+        </Suspense>
     );
 }

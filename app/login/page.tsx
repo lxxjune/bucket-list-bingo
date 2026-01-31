@@ -1,30 +1,20 @@
 'use client';
 
 import { loginOrSignup } from './actions';
-import { useActionState } from 'react';
-// Note: useActionState is available in React 19 (which the user is using).
-// However, since we are calling server actions directly from the form, we can just use the functions directly or wrap them.
-// For a simple standard login form, using formAction is the easiest way.
-
-// To handle pending state, we need useFormStatus.
-
+import { Suspense } from 'react';
 import { cn } from '@/lib/utils';
 import { useSearchParams } from 'next/navigation';
 import { ActionButton } from '@/components/ActionButton';
 import { useLogEvent } from '@/hooks/useLogEvent';
 
-
-
-export default function LoginPage() {
+function LoginFormContent() {
     const { logEvent } = useLogEvent();
     const searchParams = useSearchParams();
     const errorMessage = searchParams.get('message');
 
     return (
         <div className="min-h-screen flex flex-col items-center pt-[120px] px-[20px] bg-white">
-
             <div className="w-full max-w-[400px] flex flex-col">
-
                 {/* Title */}
                 <div className="text-center">
                     <h1 className="text-[20px] font-bold text-black leading-tight">
@@ -61,7 +51,7 @@ export default function LoginPage() {
                     {/* Message Area */}
                     {errorMessage && (
                         <div className={cn(
-                            "text-sm text-center font-medium p-3 rounded-lg",
+                            "text-sm text-center font-medium p-3 rounded-lg whitespace-pre-wrap",
                             (errorMessage.includes('완료되었습니다') || errorMessage.includes('성공적으로'))
                                 ? "bg-green-50 text-green-600"
                                 : "bg-red-50 text-red-500"
@@ -69,8 +59,6 @@ export default function LoginPage() {
                             {errorMessage}
                         </div>
                     )}
-
-
 
                     <div className="flex flex-col items-center mt-[24px]">
                         <ActionButton
@@ -94,5 +82,13 @@ export default function LoginPage() {
                 </form>
             </div>
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-white" />}>
+            <LoginFormContent />
+        </Suspense>
     );
 }

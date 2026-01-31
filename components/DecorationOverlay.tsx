@@ -15,16 +15,52 @@ export interface DecorationOverlayRef {
     clearCanvas: () => void;
     undo: () => void;
     redo: () => void;
+    exportPaths: () => Promise<any>;
+    loadPaths: (paths: any) => void;
 }
 
 export const DecorationOverlay = forwardRef<DecorationOverlayRef, DecorationOverlayProps>(
     ({ strokeColor, strokeWidth, isEraser, isHighlighter, onStroke }, ref) => {
         const canvasRef = useRef<ReactSketchCanvasRef>(null);
+        const containerRef = useRef<HTMLDivElement>(null);
 
         useImperativeHandle(ref, () => ({
             clearCanvas: () => canvasRef.current?.clearCanvas(),
             undo: () => canvasRef.current?.undo(),
             redo: () => canvasRef.current?.redo(),
+            exportPaths: async () => {
+                const paths = await canvasRef.current?.exportPaths();
+                if (!paths || !containerRef.current) return [];
+
+                const { width, height } = containerRef.current.getBoundingClientRect();
+
+                // Normalize coordinates (0-1 range)
+                return paths.map((path: any) => ({
+                    ...path,
+                    paths: path.paths.map((point: any) => ({
+                        x: point.x / width,
+                        y: point.y / height
+                    })),
+                    strokeWidth: path.strokeWidth / width // Normalize stroke width relative to width
+                }));
+            },
+            loadPaths: (paths: any) => {
+                if (!paths || !containerRef.current) return;
+
+                const { width, height } = containerRef.current.getBoundingClientRect();
+
+                // Denormalize coordinates (back to pixels)
+                const denormalizedPaths = paths.map((path: any) => ({
+                    ...path,
+                    paths: path.paths.map((point: any) => ({
+                        x: point.x * width,
+                        y: point.y * height
+                    })),
+                    strokeWidth: (path.strokeWidth || 4 / width) * width
+                }));
+
+                canvasRef.current?.loadPaths(denormalizedPaths);
+            },
         }));
 
         // Handle Eraser Mode
@@ -49,7 +85,7 @@ export const DecorationOverlay = forwardRef<DecorationOverlayRef, DecorationOver
         };
 
         return (
-            <div className="absolute top-0 left-0 w-full h-full z-20 touch-none">
+            <div ref={containerRef} className="absolute top-0 left-0 w-full h-full z-20 touch-none">
                 <ReactSketchCanvas
                     ref={canvasRef}
                     width="100%"

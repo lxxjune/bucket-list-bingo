@@ -1,19 +1,26 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Download, Share2, Check } from 'lucide-react';
+import { Download, Save } from 'lucide-react';
 import { toJpeg } from 'html-to-image';
+import { ActionButton } from './ActionButton';
 import { saveAs } from 'file-saver';
 import { trackEvent } from '@/lib/analytics';
+import { useLogEvent } from '@/hooks/useLogEvent';
+import { incrementBingoCount } from '@/app/actions/analytics';
 
 interface ActionButtonsProps {
     targetRef: React.RefObject<HTMLDivElement | null>;
     gridSize: number;
     isDecorated: boolean;
+    periodValue: string; // [NEW] Needed for increment
+    periodType: string;
+    filledCount: number;
+    onSave?: () => Promise<void>;
 }
 
-export const ActionButtons = ({ targetRef, gridSize, isDecorated }: ActionButtonsProps) => {
-    const [isCopied, setIsCopied] = useState(false);
+export const ActionButtons = ({ targetRef, gridSize, isDecorated, periodValue, periodType, filledCount, onSave }: ActionButtonsProps) => {
+    const { logEvent } = useLogEvent();
     const [isSaving, setIsSaving] = useState(false);
 
     const handleSaveImage = async () => {
@@ -60,7 +67,7 @@ export const ActionButtons = ({ targetRef, gridSize, isDecorated }: ActionButton
             // Convert DataURL to Blob
             const res = await fetch(dataUrl);
             const blob = await res.blob();
-            const file = new File([blob], '2026_bucket_list_bingo.jpg', { type: 'image/jpeg' });
+            const file = new File([blob], 'bucket_list_bingo.jpg', { type: 'image/jpeg' });
 
             // Try Web Share API ONLY for iOS (because iOS handles file saving via share sheet best)
             // Android users prefer direct download (saveAs)
@@ -68,13 +75,21 @@ export const ActionButtons = ({ targetRef, gridSize, isDecorated }: ActionButton
                 try {
                     await navigator.share({
                         files: [file],
-                        title: '2026 Bucket List Bingo',
+                        title: 'Bucket List Bingo',
                     });
                     trackEvent('click_download', {
                         final_grid_size: `${gridSize}x${gridSize}`,
                         is_decorated: isDecorated,
                         method: 'share_sheet_ios'
                     });
+                    logEvent('CLICK_DOWNLOAD', {
+                        method: 'share_sheet_ios',
+                        gridSize,
+                        isDecorated,
+                        period_type: periodType,
+                        filled_count: filledCount
+                    });
+                    incrementBingoCount(periodValue, `${gridSize}x${gridSize}`, 'download_count');
                     return; // Stop here if shared successfully
                 } catch (err) {
                     // If user cancelled, do nothing. If error, fall back to download.
@@ -84,13 +99,21 @@ export const ActionButtons = ({ targetRef, gridSize, isDecorated }: ActionButton
             }
 
             // Fallback: Direct Download (file-saver)
-            saveAs(blob, '2026_bucket_list_bingo.jpg');
+            saveAs(blob, 'bucket_list_bingo.jpg');
 
             trackEvent('click_download', {
                 final_grid_size: `${gridSize}x${gridSize}`,
                 is_decorated: isDecorated,
                 method: 'download_fallback'
             });
+            logEvent('CLICK_DOWNLOAD', {
+                method: 'download_fallback',
+                gridSize,
+                isDecorated,
+                period_type: periodType,
+                filled_count: filledCount
+            });
+            incrementBingoCount(periodValue, `${gridSize}x${gridSize}`, 'download_count');
         } catch (err) {
             console.error('Failed to save image:', err);
             trackEvent('error_save_image', {
@@ -102,48 +125,50 @@ export const ActionButtons = ({ targetRef, gridSize, isDecorated }: ActionButton
         }
     };
 
-    const handleShare = async () => {
-        const url = window.location.href;
-
-        try {
-            if (navigator.share) {
-                await navigator.share({
-                    title: 'Bucket List Bingo',
-                    text: '나만의 버킷리스트를 빙고로 만들어 친구들과 즐겨보세요 !',
-                    url: url,
-                });
-                trackEvent('click_share');
-            } else {
-                await navigator.clipboard.writeText(url);
-                setIsCopied(true);
-                trackEvent('copy_link');
-                setTimeout(() => setIsCopied(false), 2000);
-            }
-        } catch (err) {
-            console.error('Failed to share:', err);
-        }
-    };
-
-
-
     return (
-        <div className="w-full flex gap-3 justify-center mt-8">
-            <button
+        <div className="w-full flex gap-3 justify-center mt-4">
+            <ActionButton
                 onClick={handleSaveImage}
                 disabled={isSaving}
-                className="w-full flex items-center justify-center gap-2 px-2 py-3 bg-[#2A3038] text-white text-sm rounded-xl font-bold shadow-lg hover:bg-black active:scale-95 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                variant="outline"
+                size="sm"
+                icon={<Download size={16} />}
             >
-                <Download size={16} />
                 {isSaving ? '저장 중...' : '이미지 저장'}
-            </button>
+            </ActionButton>
 
-            <button
-                onClick={handleShare}
-                className="w-full flex items-center justify-center gap-2 px-2 py-3 bg-white text-[#1A1C20] text-sm border border-[#EEEFF1] rounded-xl font-bold shadow-md hover:bg-gray-50 active:scale-95 transition-all"
-            >
-                {isCopied ? <Check size={16} /> : <Share2 size={16} />}
-                {isCopied ? '복사됨!' : '공유하기'}
-            </button>
+            {/* Save to DB Button (Only visible if onSave is provided) */}
+            {onSave && (
+                <ActionButton
+                    onClick={async () => {
+                        try {
+                            setIsSaving(true);
+                            logEvent('CLICK_SAVE_BINGO', {
+                                gridSize,
+                                isDecorated,
+                                period_type: periodType,
+                                filled_count: filledCount
+                            });
+                            await onSave();
+                        } catch (e) {
+                            if (e instanceof Error) {
+                                alert(e.message);
+                            } else {
+                                alert('저장에 실패했습니다.');
+                            }
+                            console.error(e);
+                        } finally {
+                            setIsSaving(false);
+                        }
+                    }}
+                    disabled={isSaving}
+                    variant="fill"
+                    size="sm"
+                    icon={<Save size={16} />}
+                >
+                    {isSaving ? '저장 중...' : '내 빙고 저장'}
+                </ActionButton>
+            )}
         </div>
     );
 };

@@ -13,5 +13,6 @@ body {
 }
 
 @theme {
+  --font-sans: var(--font-noto-sans-kr), sans-serif;
   --font-rem: var(--font-rem), sans-serif;
 }

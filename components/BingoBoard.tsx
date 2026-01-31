@@ -3,6 +3,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { trackEvent } from '@/lib/analytics';
+import { useLogEvent } from '@/hooks/useLogEvent';
 
 interface BingoBoardProps {
     data: string[];
@@ -13,6 +14,7 @@ interface BingoBoardProps {
 
 export const BingoBoard = React.forwardRef<HTMLDivElement, BingoBoardProps>(
     ({ data, onChange, className, gridSize }, ref) => {
+        const { logEvent } = useLogEvent();
         const handleChange = (index: number, value: string) => {
             onChange(index, value);
         };
@@ -32,7 +34,7 @@ export const BingoBoard = React.forwardRef<HTMLDivElement, BingoBoardProps>(
             <div
                 ref={ref}
                 className={cn(
-                    'w-full aspect-square bg-gray-300 p-[1px]',
+                    'w-full aspect-square bg-gray-300 gap-[1px]',
                     className
                 )}
             >
@@ -44,6 +46,7 @@ export const BingoBoard = React.forwardRef<HTMLDivElement, BingoBoardProps>(
                             onClick={(e) => {
                                 const textarea = e.currentTarget.querySelector('textarea');
                                 textarea?.focus();
+                                logEvent('CLICK_CELL', { index, gridSize });
                             }}
                         >
                             <textarea
@@ -92,10 +95,10 @@ export const BingoBoard = React.forwardRef<HTMLDivElement, BingoBoardProps>(
                                 rows={1}
                                 className={cn(
                                     "w-full bg-transparent text-center font-medium resize-none outline-none text-gray-900 placeholder:text-gray-300 leading-tight overflow-hidden",
-                                    text.length > 20 ? "text-[9px] md:text-[10px]" :
-                                        text.length > 12 ? "text-[10px] md:text-xs" :
-                                            text.length > 6 ? "text-xs md:text-sm" :
-                                                "text-sm md:text-base"
+                                    text.length > 20 ? "text-[9px]" :
+                                        text.length > 12 ? "text-[10px]" :
+                                            text.length > 6 ? "text-xs" :
+                                                "text-sm"
                                 )}
                                 placeholder=""
                                 maxLength={30}

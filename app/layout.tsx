@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import { Noto_Sans_KR, REM } from "next/font/google";
 import Script from "next/script";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import SiteHeaderServer from "@/components/SiteHeaderServer";
+import { AnalyticsProvider } from "@/context/AnalyticsContext";
 import "./globals.css";
 
 const notoSansKr = Noto_Sans_KR({
   subsets: ["latin"],
-  weight: ["100", "300", "400", "500", "700", "900"],
+  weight: ["100", "300", "400", "500", "600", "700", "900"],
   variable: "--font-noto-sans-kr",
 });
 
@@ -15,6 +17,8 @@ const rem = REM({
   variable: "--font-rem",
   display: "swap",
 });
+
+
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.bucketlist.design'),
@@ -67,13 +71,16 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={`${notoSansKr.variable} ${rem.variable} antialiased font-sans`}>
-        <Script
-          id="json-ld"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-        <GoogleAnalytics />
-        {children}
+        <AnalyticsProvider>
+          <SiteHeaderServer />
+          <Script
+            id="json-ld"
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
+          <GoogleAnalytics />
+          {children}
+        </AnalyticsProvider>
       </body>
     </html>
   );

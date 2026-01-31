@@ -4,6 +4,8 @@ import Script from "next/script";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import SiteHeaderServer from "@/components/SiteHeaderServer";
 import { AnalyticsProvider } from "@/context/AnalyticsContext";
+import { GlobalLoadingProvider } from "@/context/GlobalLoadingContext";
+import { GlobalSpinner } from "@/components/GlobalSpinner";
 import "./globals.css";
 
 const notoSansKr = Noto_Sans_KR({
@@ -74,14 +76,17 @@ export default function RootLayout({
     <html lang="ko">
       <body className={`${notoSansKr.variable} ${rem.variable} antialiased font-sans`}>
         <AnalyticsProvider>
-          <SiteHeaderServer />
-          <Script
-            id="json-ld"
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-          />
-          <GoogleAnalytics />
-          {children}
+          <GlobalLoadingProvider>
+            <GlobalSpinner />
+            <SiteHeaderServer />
+            <Script
+              id="json-ld"
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            <GoogleAnalytics />
+            {children}
+          </GlobalLoadingProvider>
         </AnalyticsProvider>
       </body>
     </html>

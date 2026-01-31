@@ -10,10 +10,11 @@ import { VisitCounter } from '@/components/VisitCounter';
 import { useLogEvent } from '@/hooks/useLogEvent';
 
 import { DrawingTopBar } from '@/components/DrawingTopBar';
-import { Palette, ChevronDown, Loader2 } from 'lucide-react';
+import { Palette, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { trackEvent } from '@/lib/analytics';
 import { saveBoard, fetchBoard, BingoData } from '@/app/actions/bingo';
+import { useGlobalLoading } from '@/context/GlobalLoadingContext';
 
 type Period = 'Yearly' | 'Monthly';
 type GridSize = 3 | 4 | 5;
@@ -28,7 +29,12 @@ export default function Home() {
   const captureRef = useRef<HTMLDivElement>(null);
 
   // Loading State
-  const [isLoading, setIsLoading] = useState(true);
+  const { isLoading, setIsLoading } = useGlobalLoading();
+
+  // Initial Loading Trigger
+  useEffect(() => {
+    setIsLoading(true);
+  }, [setIsLoading]);
 
   // Helper: Restore drawing data
   const loadDrawing = (paths: any) => {
@@ -348,12 +354,7 @@ export default function Home() {
           isDecorationMode ? "shadow-2xl ring-2 ring-black/5" : "border border-gray-200"
         )}
       >
-        {/* Loading Overlay */}
-        {isLoading && (
-          <div className="absolute inset-0 bg-white/80 z-50 flex items-center justify-center backdrop-blur-sm">
-            <Loader2 className="w-10 h-10 animate-spin text-[#1A1C20]" />
-          </div>
-        )}
+
 
         {/* Absolute Draw Button (Visible only in normal mode) */}
         {!isDecorationMode && !isLoading && (
